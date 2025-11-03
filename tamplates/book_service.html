@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book {{ service.title }} - FixFinder</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); min-height: 100vh;">
+
+<header style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="window.location.href='/'">
+            <div style="width: 40px; height: 40px; background: #3B82F6; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">F</div>
+            <span style="font-size: 1.5rem; font-weight: bold; color: #3B82F6;">FixFinder</span>
+        </div>
+        
+        <nav style="display: flex; gap: 30px; align-items: center;">
+            <a href="/" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Home</a>
+            <a href="{% url 'services' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Services</a>
+        </nav>
+
+        <div style="position: relative;">
+            {% if user.is_authenticated %}
+            <div style="position: relative;">
+            <button onclick="toggleUserMenu()" style="background: #f1f5f9; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <div style="width: 32px; height: 32px; background: #3B82F6; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">
+                    {{ user.first_name|default:user.username|first|upper }}
+                </div>
+                <span>{{ user.first_name|default:user.username }}</span>
+                <span style="font-size: 12px;">▼</span>
+            </button>
+            <div id="dropdown-menu" style="display: none; position: absolute; right: 0; top: 100%; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 150px; z-index: 1001;">
+                <a href="{% url 'dashboard' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b;" 
+                   onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">Dashboard</a>
+                <a href="{% url 'profile' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b;" 
+                   onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">Profile</a>
+                <a href="{% url 'logout' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #dc2626;" 
+                   onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'">Logout</a>
+            </div>
+            {% else %}
+            <a href="{% url 'login' %}" style="text-decoration: none; color: #3B82F6; font-weight: 500; padding: 8px 16px;">Login</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<main style="padding: 40px 20px;">
+    <div style="max-width: 1000px; margin: 0 auto;">
+        
+        <!-- Page Header -->
+        <div style="text-align: center; margin-bottom: 40px;">
+            <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 10px; color: #1f2937;">Book Service</h1>
+            <p style="font-size: 1.1rem; color: #6b7280;">Complete your booking for {{ service.title }}</p>
+        </div>
+
+        <!-- Django Messages -->
+        {% if messages %}
+        <div style="margin-bottom: 25px;">
+            {% for message in messages %}
+                {% if message.tags == 'error' %}
+                <div style="background: #fee2e2; color: #dc2626; padding: 12px; border-radius: 8px; border: 1px solid #fca5a5; text-align: center; margin-bottom: 10px;">
+                    {{ message }}
+                </div>
+                {% else %}
+                <div style="background: #d1fae5; color: #065f46; padding: 12px; border-radius: 8px; border: 1px solid #a7f3d0; text-align: center; margin-bottom: 10px;">
+                    {{ message }}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div style="display: grid; grid-template-columns: 1fr 400px; gap: 30px;">
+            
+            <!-- Booking Form -->
+            <div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                <form method="POST" id="booking-form">
+                    {% csrf_token %}
+                    
+                    <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 25px; color: #1f2937; padding-bottom: 15px; border-bottom: 2px solid #f1f5f9;">Booking Details</h2>
+                    
+                    <!-- Service Date -->
+                    <div style="margin-bottom: 25px;">
+                        <label for="service_date" style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 1.1rem;">Service Date *</label>
+                        <input type="date" id="service_date" name="service_date" required 
+                               style="width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: all 0.3s; outline: none; box-sizing: border-box;"
+                               min="{{ today }}"
+                               onfocus="this.style.borderColor='#3B82F6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'" 
+                               onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+                    </div>
+
+                    <!-- Service Time -->
+                    <div style="margin-bottom: 25px;">
+                        <label for="service_time" style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 1.1rem;">Preferred Time *</label>
+                        <select id="service_time" name="service_time" required 
+                                style="width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; outline: none; cursor: pointer; box-sizing: border-box;"
+                                onfocus="this.style.borderColor='#3B82F6'" onblur="this.style.borderColor='#e5e7eb'">
+                            <option value="">Select preferred time</option>
+                            <option value="09:00">9:00 AM</option>
+                            <option value="10:00">10:00 AM</option>
+                            <option value="11:00">11:00 AM</option>
+                            <option value="12:00">12:00 PM</option>
+                            <option value="14:00">2:00 PM</option>
+                            <option value="15:00">3:00 PM</option>
+                            <option value="16:00">4:00 PM</option>
+                            <option value="17:00">5:00 PM</option>
+                        </select>
+                    </div>
+
+                    <!-- Service Address -->
+                    <div style="margin-bottom: 25px;">
+                        <label for="address" style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 1.1rem;">Service Address *</label>
+                        <textarea id="address" name="address" required rows="3"
+                                  style="width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: all 0.3s; outline: none; resize: vertical; box-sizing: border-box; font-family: inherit;"
+                                  placeholder="Enter complete address where service is needed..."
+                                  onfocus="this.style.borderColor='#3B82F6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'" 
+                                  onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">{{ user.location|default:'' }}</textarea>
+                    </div>
+
+                    <!-- Special Instructions -->
+                    <div style="margin-bottom: 30px;">
+                        <label for="special_instructions" style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 1.1rem;">Special Instructions (Optional)</label>
+                        <textarea id="special_instructions" name="special_instructions" rows="3"
+                                  style="width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: all 0.3s; outline: none; resize: vertical; box-sizing: border-box; font-family: inherit;"
+                                  placeholder="Any special requirements or instructions for the service provider..."
+                                  onfocus="this.style.borderColor='#3B82F6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'" 
+                                  onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'"></textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" 
+                            style="width: 100%; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 16px; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s;"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(16, 185, 129, 0.3)'" 
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                        Confirm Booking
+                    </button>
+                </form>
+            </div>
+
+            <!-- Service Summary -->
+            <div style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); height: fit-content; position: sticky; top: 100px;">
+                <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 25px; color: #1f2937; padding-bottom: 15px; border-bottom: 2px solid #f1f5f9;">Service Summary</h2>
+                
+                <div style="display: flex; align-items: start; gap: 15px; margin-bottom: 20px;">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #3B82F6, #1d4ed8); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                        {{ service.category.icon }}
+                    </div>
+                    <div>
+                        <h3 style="font-weight: 600; color: #1f2937; margin: 0 0 5px 0; font-size: 1.1rem;">{{ service.title }}</h3>
+                        <p style="color: #6b7280; margin: 0; font-size: 0.9rem;">{{ service.category.name }}</p>
+                    </div>
+                </div>
+
+                <div style="border-top: 1px solid #f1f5f9; padding-top: 20px;">
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="display: flex; justify-content: between;">
+                            <span style="color: #6b7280;">Provider:</span>
+                            <span style="font-weight: 500; color: #1f2937;">{{ service.provider.get_full_name }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: between;">
+                            <span style="color: #6b7280;">Price:</span>
+                            <span style="font-weight: 600; color: #3B82F6; font-size: 1.1rem;">{{ service.price_range }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: between;">
+                            <span style="color: #6b7280;">Location:</span>
+                            <span style="font-weight: 500; color: #1f2937;">{{ service.location }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: between;">
+                            <span style="color: #6b7280;">Experience:</span>
+                            <span style="font-weight: 500; color: #1f2937;">{{ service.experience }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: between;">
+                            <span style="color: #6b7280;">Availability:</span>
+                            <span style="font-weight: 500; color: #10b981;">{{ service.availability }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Info -->
+                <div style="border-top: 1px solid #f1f5f9; padding-top: 20px; margin-top: 20px;">
+                    <h4 style="font-weight: 600; color: #1f2937; margin-bottom: 15px;">Provider Contact</h4>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="color: #6b7280;">📞</span>
+                            <span style="color: #6b7280; font-size: 0.9rem;">{{ service.provider.phone }}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="color: #6b7280;">📍</span>
+                            <span style="color: #6b7280; font-size: 0.9rem;">{{ service.provider.location }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Need Help -->
+                <div style="border-top: 1px solid #f1f5f9; padding-top: 20px; margin-top: 20px;">
+                    <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; border-left: 4px solid #3B82F6;">
+                        <h4 style="font-weight: 600; color: #0369a1; margin-bottom: 8px; font-size: 0.9rem;">Need Help?</h4>
+                        <p style="color: #0369a1; margin: 0; font-size: 0.8rem; line-height: 1.4;">
+                            Contact our support team if you have any questions about this booking.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+function toggleUserMenu() {
+    const dropdown = document.getElementById('dropdown-menu');
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+}
+
+// Set minimum date to today
+document.getElementById('service_date').min = new Date().toISOString().split('T')[0];
+
+// Form validation
+document.getElementById('booking-form').addEventListener('submit', function(e) {
+    const serviceDate = document.getElementById('service_date').value;
+    const serviceTime = document.getElementById('service_time').value;
+    const address = document.getElementById('address').value;
+    
+    if (!serviceDate || !serviceTime || !address) {
+        e.preventDefault();
+        alert('Please fill all required fields.');
+        return false;
+    }
+    
+    // Check if date is in the past
+    const selectedDate = new Date(serviceDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+        e.preventDefault();
+        alert('Please select a future date.');
+        return false;
+    }
+    
+    return true;
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('dropdown-menu');
+    if (dropdown && !event.target.closest('header > div > div:last-child')) {
+        dropdown.style.display = 'none';
+    }
+});
+
+// Auto-hide messages after 5 seconds
+setTimeout(function() {
+    const messages = document.querySelectorAll('[style*="background: #d1fae5"], [style*="background: #fee2e2"]');
+    messages.forEach(message => {
+        message.style.display = 'none';
+    });
+}, 5000);
+</script>
+
+</body>
+</html>

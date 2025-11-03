@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - FixFinder</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc;">
+
+<!-- Header -->
+<header style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: fixed; width: 100%; top: 0; z-index: 1000;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="window.location.href='{% url 'home' %}'">
+            <div style="width: 40px; height: 40px; background: #3B82F6; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">F</div>
+            <span style="font-size: 1.5rem; font-weight: bold; color: #3B82F6;">FixFinder</span>
+        </div>
+        
+        <nav style="display: flex; gap: 30px; align-items: center;">
+            <a href="{% url 'dashboard' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Dashboard</a>
+            <a href="{% url 'services' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Services</a>
+            <a href="{% url 'profile' %}" style="text-decoration: none; color: #3B82F6; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#2563eb'" onmouseout="this.style.color='#3B82F6'">Profile</a>
+        </nav>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main style="margin-top: 80px; padding: 40px 20px;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        
+        <!-- Page Header -->
+        <div style="text-align: center; margin-bottom: 40px;">
+            <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 10px; color: #1f2937;">Edit Profile</h1>
+            <p style="color: #6b7280; font-size: 1.1rem;">Update your personal and business information</p>
+        </div>
+
+        <!-- Django Messages -->
+         {% if messages %}
+            <div style="margin-bottom: 25px;">
+                {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                        <div style="padding: 12px; border-radius: 8px; margin-bottom: 10px; background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;">
+                            {{ message }}
+                        </div>
+                    {% elif message.tags == 'error' %}
+                        <div style="padding: 12px; border-radius: 8px; margin-bottom: 10px; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;">
+                            {{ message }}
+                        </div>
+                    {% elif message.tags == 'warning' %}
+                        <div style="padding: 12px; border-radius: 8px; margin-bottom: 10px; background: #fffbeb; color: #92400e; border: 1px solid #fcd34d;">
+                            {{ message }}
+                        </div>
+                    {% else %}
+                        <div style="padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Edit Form -->
+        <div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07);">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Personal Information -->
+                <div style="margin-bottom: 40px;">
+                    <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 25px; color: #1f2937; padding-bottom: 10px; border-bottom: 2px solid #f1f5f9;">Personal Information</h2>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">First Name</label>
+                            {{ user_form.first_name }}
+                            {% if user_form.first_name.errors %}
+                                <div style="color: #dc2626; font-size: 0.875rem; margin-top: 5px;">
+                                    {{ user_form.first_name.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Last Name</label>
+                            {{ user_form.last_name }}
+                            {% if user_form.last_name.errors %}
+                                <div style="color: #dc2626; font-size: 0.875rem; margin-top: 5px;">
+                                    {{ user_form.last_name.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Email Address</label>
+                        {{ user_form.email }}
+                        {% if user_form.email.errors %}
+                            <div style="color: #dc2626; font-size: 0.875rem; margin-top: 5px;">
+                                {{ user_form.email.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Phone Number</label>
+                            {{ profile_form.phone }}
+                            {% if profile_form.phone.errors %}
+                                <div style="color: #dc2626; font-size: 0.875rem; margin-top: 5px;">
+                                    {{ profile_form.phone.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Location</label>
+                            {{ profile_form.location }}
+                            {% if profile_form.location.errors %}
+                                <div style="color: #dc2626; font-size: 0.875rem; margin-top: 5px;">
+                                    {{ profile_form.location.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Bio</label>
+                        {{ profile_form.bio }}
+                        {% if profile_form.bio.errors %}
+                            <div style="color: #dc2626; font-size: 0.875rem; margin-top: 5px;">
+                                {{ profile_form.bio.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Date of Birth</label>
+                        {{ profile_form.date_of_birth }}
+                        {% if profile_form.date_of_birth.errors %}
+                            <div style="color: #dc2626; font-size: 0.875rem; margin-top: 5px;">
+                                {{ profile_form.date_of_birth.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Provider Information -->
+                {% if user_profile.user_type == 'provider' %}
+                <div style="margin-bottom: 40px;">
+                    <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 25px; color: #1f2937; padding-bottom: 10px; border-bottom: 2px solid #f1f5f9;">Business Information</h2>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Business Name</label>
+                        {{ profile_form.business_name }}
+                        {% if profile_form.business_name.errors %}
+                            <div style="color: #dc2626; font-size: 0.875rem; margin-top: 5px;">
+                                {{ profile_form.business_name.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Experience</label>
+                            {{ profile_form.experience }}
+                            {% if profile_form.experience.errors %}
+                                <div style="color: #dc2626; font-size: 0.875rem; margin-top: 5px;">
+                                    {{ profile_form.experience.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Service Area</label>
+                            {{ profile_form.service_area }}
+                            {% if profile_form.service_area.errors %}
+                                <div style="color: #dc2626; font-size: 0.875rem; margin-top: 5px;">
+                                    {{ profile_form.service_area.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Service Categories</label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 10px;">
+                            {% for category in profile_form.service_categories %}
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    {{ category.tag }}
+                                    <span style="color: #374151;">{{ category.choice }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                        {% if profile_form.service_categories.errors %}
+                            <div style="color: #dc2626; font-size: 0.875rem; margin-top: 5px;">
+                                {{ profile_form.service_categories.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">License Number</label>
+                            {{ profile_form.license_number }}
+                            {% if profile_form.license_number.errors %}
+                                <div style="color: #dc2626; font-size: 0.875rem; margin-top: 5px;">
+                                    {{ profile_form.license_number.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Insurance Information</label>
+                            {{ profile_form.insurance_info }}
+                            {% if profile_form.insurance_info.errors %}
+                                <div style="color: #dc2626; font-size: 0.875rem; margin-top: 5px;">
+                                    {{ profile_form.insurance_info.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Form Actions -->
+                <div style="display: flex; gap: 15px; justify-content: flex-end; padding-top: 25px; border-top: 1px solid #f1f5f9;">
+                    <a href="{% url 'profile' %}" style="background: #6b7280; color: white; padding: 12px 30px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-decoration: none;"
+                       onmouseover="this.style.background='#4b5563'" onmouseout="this.style.background='#6b7280'">Cancel</a>
+                    <button type="submit" style="background: #3B82F6; color: white; padding: 12px 30px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;"
+                            onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3B82F6'">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<style>
+/* Form input styling */
+input, textarea, select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s;
+    outline: none;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Checkbox styling */
+input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+}
+</style>
+
+</body>
+</html>

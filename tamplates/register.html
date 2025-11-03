@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - FixFinder</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px 0;">
+
+<div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 600px; margin: 20px;">
+    <!-- Header -->
+    <div style="text-align: center; margin-bottom: 30px;">
+        <div style="width: 60px; height: 60px; background: #3B82F6; color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 1.8rem; font-weight: bold;">F</div>
+        <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 8px; color: #1f2937;">Join FixFinder</h1>
+        <p style="color: #6b7280; margin: 0;">Create your account to get started</p>
+    </div>
+
+    <!-- Messages -->
+   {% if messages %}
+<div style="margin-bottom: 20px;">
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+        <div style="background: #fee2e2; color: #dc2626; padding: 12px; border-radius: 8px; border: 1px solid #fca5a5; text-align: center; margin-bottom: 10px;">
+            {{ message }}
+        </div>
+        {% else %}
+        <div style="background: #d1fae5; color: #065f46; padding: 12px; border-radius: 8px; border: 1px solid #a7f3d0; text-align: center; margin-bottom: 10px;">
+            {{ message }}
+        </div>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
+    <!-- Registration Form -->
+    <form method="post" action="{% url 'register' %}" style="display: flex; flex-direction: column; gap: 20px;">
+        {% csrf_token %}
+        
+        <input type="hidden" name="user_type" value="{{ request.GET.type|default:'customer' }}">
+
+        <!-- User Type Selection -->
+        <div>
+            <label style="display: block; margin-bottom: 12px; font-weight: 500; color: #374151;">I am a:</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <button type="button" onclick="selectUserType('customer')" id="customer-btn"
+                        style="padding: 15px; border: 2px solid #3B82F6; background: #3B82F6; color: white; border-radius: 8px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500;">
+                    <span style="font-size: 1.2rem;">👤</span> Customer
+                </button>
+                <button type="button" onclick="selectUserType('provider')" id="provider-btn"
+                        style="padding: 15px; border: 2px solid #e5e7eb; background: white; color: #6b7280; border-radius: 8px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500;">
+                    <span style="font-size: 1.2rem;">🔧</span> Service Provider
+                </button>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+                <label for="name" style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Full Name</label>
+                <input type="text" id="name" name="name" required 
+                       style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: all 0.3s; outline: none; box-sizing: border-box;"
+                       placeholder="Enter your full name"
+                       onfocus="this.style.borderColor='#3B82F6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'" 
+                       onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+            </div>
+
+            <div>
+                <label for="email" style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Email Address</label>
+                <input type="email" id="email" name="email" required 
+                       style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: all 0.3s; outline: none; box-sizing: border-box;"
+                       placeholder="Enter your email"
+                       onfocus="this.style.borderColor='#3B82F6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'" 
+                       onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+                <label for="phone" style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Phone Number</label>
+                <input type="tel" id="phone" name="phone" required 
+                       style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: all 0.3s; outline: none; box-sizing: border-box;"
+                       placeholder="Enter your phone number"
+                       onfocus="this.style.borderColor='#3B82F6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'" 
+                       onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+            </div>
+
+            <div>
+                <label for="location" style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Location</label>
+                <div style="position: relative;">
+                    <input type="text" id="location" name="location" required 
+                           style="width: 100%; padding: 12px 40px 12px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: all 0.3s; outline: none; box-sizing: border-box;"
+                           placeholder="Enter your city/area"
+                           onfocus="this.style.borderColor='#3B82F6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'" 
+                           onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+                    <button type="button" onclick="getCurrentLocation()" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: #3B82F6; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;" title="Get Current Location">📍</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+                <label for="password" style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Password</label>
+                <div style="position: relative;">
+                    <input type="password" id="password" name="password" required minlength="6"
+                           style="width: 100%; padding: 12px 45px 12px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: all 0.3s; outline: none; box-sizing: border-box;"
+                           placeholder="Create a password (min 6 characters)"
+                           onfocus="this.style.borderColor='#3B82F6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'" 
+                           onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+                    <button type="button" onclick="togglePassword('password')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #6b7280; cursor: pointer; padding: 4px; font-size: 1.2rem;"
+                            title="Show/Hide Password">👁️</button>
+                </div>
+            </div>
+
+            <div>
+                <label for="confirmPassword" style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Confirm Password</label>
+                <div style="position: relative;">
+                    <input type="password" id="confirmPassword" name="confirm_password" required 
+                           style="width: 100%; padding: 12px 45px 12px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: all 0.3s; outline: none; box-sizing: border-box;"
+                           placeholder="Confirm your password"
+                           onfocus="this.style.borderColor='#3B82F6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'" 
+                           onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+                    <button type="button" onclick="togglePassword('confirmPassword')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #6b7280; cursor: pointer; padding: 4px; font-size: 1.2rem;"
+                            title="Show/Hide Password">👁️</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Provider-specific fields -->
+        <div id="provider-fields" style="display: none;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <label for="business-name" style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Business/Company Name</label>
+                    <input type="text" id="business-name" name="business_name"
+                           style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: all 0.3s; outline: none; box-sizing: border-box;"
+                           placeholder="Your business name"
+                           onfocus="this.style.borderColor='#3B82F6'" onblur="this.style.borderColor='#e5e7eb'">
+                </div>
+
+                <div>
+                    <label for="experience" style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Years of Experience</label>
+                    <select id="experience" name="experience"
+                            style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; outline: none; cursor: pointer; box-sizing: border-box;"
+                            onfocus="this.style.borderColor='#3B82F6'" onblur="this.style.borderColor='#e5e7eb'">
+                        <option value="">Select experience</option>
+                        <option value="0-1">0-1 years</option>
+                        <option value="1-3">1-3 years</option>
+                        <option value="3-5">3-5 years</option>
+                        <option value="5-10">5-10 years</option>
+                        <option value="10+">10+ years</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Service Categories -->
+            <div>
+                <label style="display: block; margin-bottom: 12px; font-weight: 500; color: #374151;">Service Categories (Select all that apply)</label>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                    {% for category in categories %}
+                    <label style="display: flex; align-items: center; gap: 8px; padding: 10px; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                        <input type="checkbox" name="categories" value="{{ category.id }}" style="width: 16px; height: 16px;">
+                        <span>{{ category.icon }} {{ category.name }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" 
+                style="width: 100%; background: #3B82F6; color: white; padding: 14px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; box-sizing: border-box;"
+                onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-1px)'" 
+                onmouseout="this.style.background='#3B82F6'; this.style.transform='translateY(0)'">
+            Create Account
+        </button>
+    </form>
+
+    <!-- Already have account -->
+    <div style="text-align: center; margin-top: 30px;">
+        <p style="color: #6b7280; margin-bottom: 15px;">Already have an account?</p>
+        <a href="{% url 'login' %}" style="color: #3B82F6; text-decoration: none; font-weight: 600; transition: color 0.3s;"
+           onmouseover="this.style.color='#2563eb'" onmouseout="this.style.color='#3B82F6'">Sign In Instead</a>
+    </div>
+
+    <!-- Back to Home -->
+    <div style="text-align: center; margin-top: 15px;">
+        <a href="/" style="color: #6b7280; text-decoration: none; font-size: 0.9rem; transition: color 0.3s;"
+           onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#6b7280'">← Back to Home</a>
+    </div>
+</div>
+
+<script>
+let selectedUserType = '{{ request.GET.type|default:"customer" }}';
+
+function selectUserType(type) {
+    selectedUserType = type;
+    const customerBtn = document.getElementById('customer-btn');
+    const providerBtn = document.getElementById('provider-btn');
+    const providerFields = document.getElementById('provider-fields');
+    const userTypeInput = document.querySelector('input[name="user_type"]');
+    
+    userTypeInput.value = type;
+    
+    if (type === 'customer') {
+        customerBtn.style.background = '#3B82F6';
+        customerBtn.style.color = 'white';
+        customerBtn.style.borderColor = '#3B82F6';
+        
+        providerBtn.style.background = 'white';
+        providerBtn.style.color = '#6b7280';
+        providerBtn.style.borderColor = '#e5e7eb';
+        
+        providerFields.style.display = 'none';
+    } else {
+        providerBtn.style.background = '#3B82F6';
+        providerBtn.style.color = 'white';
+        providerBtn.style.borderColor = '#3B82F6';
+        
+        customerBtn.style.background = 'white';
+        customerBtn.style.color = '#6b7280';
+        customerBtn.style.borderColor = '#e5e7eb';
+        
+        providerFields.style.display = 'block';
+    }
+}
+
+function togglePassword(fieldId) {
+    const passwordInput = document.getElementById(fieldId);
+    const toggleBtn = passwordInput.nextElementSibling;
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleBtn.innerHTML = '🙈';
+    } else {
+        passwordInput.type = 'password';
+        toggleBtn.innerHTML = '👁️';
+    }
+}
+
+function getCurrentLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            document.getElementById('location').value = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+        }, function(error) {
+            console.log('Location access denied.');
+        });
+    } else {
+        console.log('Geolocation is not supported by this browser.');
+    }
+}
+
+// Initialize user type based on URL parameter
+document.addEventListener('DOMContentLoaded', function() {
+    selectUserType(selectedUserType);
+});
+</script>
+
+</body>
+</html>

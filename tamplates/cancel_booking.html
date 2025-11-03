@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancel Booking - FixFinder</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #fef2f2, #fee2e2); min-height: 100vh;">
+
+<!-- Header -->
+<header style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="window.location.href='/'">
+            <div style="width: 40px; height: 40px; background: #3B82F6; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">F</div>
+            <span style="font-size: 1.5rem; font-weight: bold; color: #3B82F6;">FixFinder</span>
+        </div>
+        
+        <nav style="display: flex; gap: 30px; align-items: center;">
+            <a href="/" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Home</a>
+            <a href="{% url 'services' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Services</a>
+        </nav>
+
+        <div style="position: relative;">
+           {% if user.is_authenticated %}
+            <div style="position: relative;">
+            <button onclick="toggleUserMenu()" style="background: #f1f5f9; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <div style="width: 32px; height: 32px; background: #3B82F6; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">
+                    {{ user.first_name|default:user.username|first|upper }}
+                </div>
+                <span>{{ user.first_name|default:user.username }}</span>
+                <span style="font-size: 12px;">▼</span>
+            </button>
+            <div id="dropdown-menu" style="display: none; position: absolute; right: 0; top: 100%; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 150px; z-index: 1001;">
+                <a href="{% url 'dashboard' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b;" 
+                   onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">Dashboard</a>
+                <a href="{% url 'profile' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b;" 
+                   onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">Profile</a>
+                <a href="{% url 'logout' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #dc2626;" 
+                   onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'">Logout</a>
+            </div>
+            {% else %}
+            <a href="{% url 'login' %}" style="text-decoration: none; color: #3B82F6; font-weight: 500; padding: 8px 16px;">Login</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<main style="padding: 40px 20px;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        
+        <!-- Page Header -->
+        <div style="text-align: center; margin-bottom: 40px;">
+            <div style="width: 80px; height: 80px; background: #ef4444; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 20px;">
+                ⚠️
+            </div>
+            <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 10px; color: #dc2626;">Cancel Booking</h1>
+            <p style="font-size: 1.1rem; color: #6b7280;">Are you sure you want to cancel this booking?</p>
+        </div>
+
+        <!-- Django Messages -->
+        {% if messages %}
+        <div style="margin-bottom: 25px;">
+            {% for message in messages %}
+                {% if message.tags == 'error' %}
+                <div style="background: #fee2e2; color: #dc2626; padding: 12px; border-radius: 8px; border: 1px solid #fca5a5; text-align: center; margin-bottom: 10px;">
+                    {{ message }}
+                </div>
+                {% else %}
+                <div style="background: #d1fae5; color: #065f46; padding: 12px; border-radius: 8px; border: 1px solid #a7f3d0; text-align: center; margin-bottom: 10px;">
+                    {{ message }}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+            
+            <!-- Booking Details -->
+            <div style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-left: 4px solid #ef4444;">
+                <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 25px; color: #1f2937; padding-bottom: 15px; border-bottom: 2px solid #f1f5f9;">Booking Details</h2>
+                
+                <div style="display: flex; align-items: start; gap: 15px; margin-bottom: 20px;">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #3B82F6, #1d4ed8); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                        {% if booking.service %}{{ booking.service.category.icon }}{% else %}🔧{% endif %}
+                    </div>
+                    <div>
+                        <h3 style="font-weight: 600; color: #1f2937; margin: 0 0 5px 0; font-size: 1.1rem;">
+                            {{ booking.service.title|default:booking.service_name }}
+                        </h3>
+                        <p style="color: #6b7280; margin: 0; font-size: 0.9rem;">
+                            {% if booking.service %}{{ booking.service.category.name }}{% else %}General Service{% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <div style="border-top: 1px solid #f1f5f9; padding-top: 20px;">
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="display: flex; justify-content: between;">
+                            <span style="color: #6b7280;">Provider:</span>
+                            <span style="font-weight: 500; color: #1f2937;">{{ booking.provider.get_full_name }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: between;">
+                            <span style="color: #6b7280;">Booking ID:</span>
+                            <span style="font-weight: 600; color: #3B82F6;">#{{ booking.id }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: between;">
+                            <span style="color: #6b7280;">Date & Time:</span>
+                            <span style="font-weight: 500; color: #1f2937;">
+                                {{ booking.service_date|date:"M d, Y" }} at {{ booking.service_time|time:"g:i A" }}
+                            </span>
+                        </div>
+                        <div style="display: flex; justify-content: between;">
+                            <span style="color: #6b7280;">Total Amount:</span>
+                            <span style="font-weight: 600; color: #ef4444; font-size: 1.1rem;">₹{{ booking.total_price }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: between;">
+                            <span style="color: #6b7280;">Current Status:</span>
+                            <span style="background-color: #f59e0b; color: white; padding: 4px 12px; border-radius: 15px; font-size: 0.8rem; font-weight: 500; text-transform: capitalize;">
+                                {{ booking.status }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div style="border-top: 1px solid #f1f5f9; padding-top: 20px; margin-top: 20px;">
+                    <h4 style="font-weight: 600; color: #374151; margin-bottom: 10px; font-size: 1rem;">📍 Service Location</h4>
+                    <p style="color: #6b7280; margin: 0; font-size: 0.9rem; line-height: 1.4;">{{ booking.customer_address }}</p>
+                </div>
+
+                {% if booking.special_instructions %}
+                <div style="border-top: 1px solid #f1f5f9; padding-top: 20px; margin-top: 20px;">
+                    <h4 style="font-weight: 600; color: #374151; margin-bottom: 10px; font-size: 1rem;">📝 Special Instructions</h4>
+                    <p style="color: #6b7280; margin: 0; font-size: 0.9rem; line-height: 1.4;">{{ booking.special_instructions }}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Cancellation Form -->
+            <div>
+                <div style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-left: 4px solid #ef4444;">
+                    <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 20px; color: #dc2626;">Confirm Cancellation</h2>
+                    
+                    <!-- Warning Message -->
+                    <div style="background: #fef2f2; padding: 20px; border-radius: 8px; border: 1px solid #fecaca; margin-bottom: 25px;">
+                        <div style="display: flex; align-items: start; gap: 10px;">
+                            <span style="color: #dc2626; font-size: 1.2rem;">⚠️</span>
+                            <div>
+                                <h4 style="font-weight: 600; color: #dc2626; margin-bottom: 8px; font-size: 1rem;">Important Notice</h4>
+                                <p style="color: #dc2626; margin: 0; font-size: 0.9rem; line-height: 1.4;">
+                                    Cancelling this booking will notify the service provider and this action cannot be undone. 
+                                    Please provide a reason for cancellation.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="POST" id="cancel-form">
+                        {% csrf_token %}
+                        
+                        <!-- Cancellation Reason -->
+                        <div style="margin-bottom: 25px;">
+                            <label for="cancellation_reason" style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 1.1rem;">Cancellation Reason *</label>
+                            <select id="cancellation_reason" name="cancellation_reason" required 
+                                    style="width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; outline: none; cursor: pointer; box-sizing: border-box;"
+                                    onfocus="this.style.borderColor='#ef4444'" onblur="this.style.borderColor='#e5e7eb'">
+                                <option value="">Select a reason for cancellation</option>
+                                <option value="change_of_plans">Change of plans</option>
+                                <option value="found_another_provider">Found another service provider</option>
+                                <option value="service_no_longer_needed">Service no longer needed</option>
+                                <option value="scheduling_conflict">Scheduling conflict</option>
+                                <option value="price_concern">Price concern</option>
+                                <option value="personal_reasons">Personal reasons</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <!-- Additional Comments -->
+                        <div style="margin-bottom: 30px;">
+                            <label for="additional_comments" style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 1.1rem;">Additional Comments (Optional)</label>
+                            <textarea id="additional_comments" name="additional_comments" rows="3"
+                                      style="width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: all 0.3s; outline: none; resize: vertical; box-sizing: border-box; font-family: inherit;"
+                                      placeholder="Provide any additional details about the cancellation..."
+                                      onfocus="this.style.borderColor='#ef4444'; this.style.boxShadow='0 0 0 3px rgba(239, 68, 68, 0.1)'" 
+                                      onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'"></textarea>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div style="display: flex; gap: 15px;">
+                            <button type="submit" 
+                                    style="flex: 1; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 14px; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s;"
+                                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(239, 68, 68, 0.3)'" 
+                                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                Confirm Cancellation
+                            </button>
+                            <a href="{% url 'booking_detail' booking.id %}" 
+                               style="flex: 1; background: #6b7280; color: white; padding: 14px; border-radius: 8px; text-decoration: none; font-size: 1.1rem; font-weight: 600; text-align: center; transition: all 0.3s;"
+                               onmouseover="this.style.background='#4b5563'; this.style.transform='translateY(-2px)'" 
+                               onmouseout="this.style.background='#6b7280'; this.style.transform='translateY(0)'">
+                                Go Back
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Cancellation Policy -->
+                <div style="background: #f0f9ff; padding: 20px; border-radius: 12px; border-left: 4px solid #3B82F6; margin-top: 20px;">
+                    <h4 style="font-weight: 600; color: #0369a1; margin-bottom: 10px; font-size: 1rem;">📋 Cancellation Policy</h4>
+                    <div style="color: #0369a1; font-size: 0.85rem; line-height: 1.5;">
+                        <p style="margin: 0 0 8px 0;">• Cancellations made 24+ hours before service: Full refund</p>
+                        <p style="margin: 0 0 8px 0;">• Cancellations made within 24 hours: 50% refund</p>
+                        <p style="margin: 0;">• Same-day cancellations: No refund applicable</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+function toggleUserMenu() {
+    const dropdown = document.getElementById('dropdown-menu');
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+}
+
+// Form validation
+document.getElementById('cancel-form').addEventListener('submit', function(e) {
+    const reason = document.getElementById('cancellation_reason').value;
+    
+    if (!reason) {
+        e.preventDefault();
+        alert('Please select a cancellation reason.');
+        return false;
+    }
+    
+    // Show confirmation dialog
+    const confirmed = confirm('Are you sure you want to cancel this booking? This action cannot be undone.');
+    if (!confirmed) {
+        e.preventDefault();
+        return false;
+    }
+    
+    // Show loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.innerHTML = 'Cancelling...';
+    submitBtn.disabled = true;
+    
+    return true;
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('dropdown-menu');
+    if (dropdown && !event.target.closest('header > div > div:last-child')) {
+        dropdown.style.display = 'none';
+    }
+});
+
+// Auto-hide messages after 5 seconds
+setTimeout(function() {
+    const messages = document.querySelectorAll('[style*="background: #d1fae5"], [style*="background: #fee2e2"]');
+    messages.forEach(message => {
+        message.style.display = 'none';
+    });
+}, 5000);
+</script>
+
+</body>
+</html>

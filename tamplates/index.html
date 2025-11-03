@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FixFinder - Find Trusted Home Repair Services</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #333;">
+
+<!-- Header -->
+<header style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: fixed; width: 100%; top: 0; z-index: 1000;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="window.location.href='/'">
+            <div style="width: 40px; height: 40px; background: #3B82F6; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">F</div>
+            <span style="font-size: 1.5rem; font-weight: bold; color: #3B82F6;">FixFinder</span>
+        </div>
+        
+        <nav style="display: flex; gap: 30px; align-items: center;" id="nav-menu">
+            <a href="/" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Home</a>
+            <a href="{% url 'services' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Services</a>
+            <a href="{% url 'post_service_request' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Post Request</a>
+            <a href="{% url 'about' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">About</a>
+            <a href="{% url 'contact' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Contact</a>
+        </nav>
+
+        <div id="auth-buttons">
+            {% if user.is_authenticated %}
+            <div style="position: relative;">
+            <button onclick="toggleUserMenu()" style="background: #f1f5f9; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <div style="width: 32px; height: 32px; background: #3B82F6; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">
+                    {{ user.first_name|default:user.username|first|upper }}
+                </div>
+                <span>{{ user.first_name|default:user.username }}</span>
+                <span style="font-size: 12px;">▼</span>
+            </button>
+                <div id="dropdown-menu" style="display: none; position: absolute; right: 0; top: 100%; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 150px; z-index: 1001;">
+                    <a href="{% url 'dashboard' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b; border-bottom: 1px solid #e2e8f0;" 
+                       onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">Dashboard</a>
+                    <a href="{% url 'profile' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b; border-bottom: 1px solid #e2e8f0;" 
+                       onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">Profile</a>
+                    <a href="{% url 'logout' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #dc2626; border-bottom: 1px solid #e2e8f0;" 
+                       onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'">Logout</a>
+                </div>
+            </div>
+            {% else %}
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <a href="{% url 'login' %}" style="text-decoration: none; color: #3B82F6; font-weight: 500; padding: 8px 16px; transition: all 0.3s;" 
+                   onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">Login</a>
+                <a href="{% url 'register' %}" style="text-decoration: none; background: #3B82F6; color: white; padding: 8px 20px; border-radius: 8px; font-weight: 500; transition: all 0.3s;" 
+                   onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-1px)'" 
+                   onmouseout="this.style.background='#3B82F6'; this.style.transform='translateY(0)'">Register</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<!-- Hero Section -->
+<section style="background: linear-gradient(135deg, #3B82F6, #1d4ed8); color: white; padding: 120px 20px 80px; text-align: center; margin-top: 70px;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <h1 style="font-size: 3.5rem; margin-bottom: 20px; font-weight: 700; line-height: 1.2;">Find Trusted Home<br><span style="color: #fbbf24;">Repair Services</span></h1>
+        <p style="font-size: 1.25rem; margin-bottom: 40px; opacity: 0.9; max-width: 600px; margin-left: auto; margin-right: auto;">Connect with verified professionals for all your household repairs. From plumbing to electrical work, we've got you covered.</p>
+        
+        <!-- Search Box -->
+        <div style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 20px 25px rgba(0,0,0,0.1); display: flex; gap: 15px; max-width: 800px; margin: 40px auto; flex-wrap: wrap; align-items: center;">
+            <input type="text" id="search-service" placeholder="What service do you need? (e.g. Plumber, Electrician)" 
+                   style="flex: 1; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; min-width: 250px; outline: none; transition: border-color 0.3s;"
+                   onfocus="this.style.borderColor='#3B82F6'" onblur="this.style.borderColor='#e2e8f0'">
+            <input type="text" id="search-location" placeholder="Enter your location" 
+                   style="flex: 1; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; min-width: 200px; outline: none; transition: border-color 0.3s;"
+                   onfocus="this.style.borderColor='#3B82F6'" onblur="this.style.borderColor='#e2e8f0'">
+            <button onclick="searchServices()" style="background: #F97316; color: white; padding: 12px 30px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; white-space: nowrap;"
+                    onmouseover="this.style.background='#ea580c'; this.style.transform='translateY(-1px)'" 
+                    onmouseout="this.style.background='#F97316'; this.style.transform='translateY(0)'">Search</button>
+        </div>
+
+        <!-- CTA Buttons -->
+        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 30px;">
+            <button onclick="checkAuthAndRedirect('{% url 'post_service_request' %}')"style="background: #fbbf24; color: #1f2937; padding: 12px 30px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; font-size: 1rem;"
+                    onmouseover="this.style.background='#f59e0b'; this.style.transform='translateY(-1px)'" 
+                    onmouseout="this.style.background='#fbbf24'; this.style.transform='translateY(0)'">Post Your Request</button>
+            <a href="{% url 'register' %}?type=provider" style="background: transparent; border: 2px solid white; color: white; padding: 10px 28px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: all 0.3s; display: inline-block; font-size: 1rem;"
+               onmouseover="this.style.background='white'; this.style.color='#3B82F6'" 
+               onmouseout="this.style.background='transparent'; this.style.color='white'">Become a Service Provider</a>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section style="padding: 80px 20px; background: white;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 60px;">
+            <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 15px; color: #1f2937;">Popular Services</h2>
+            <p style="font-size: 1.1rem; color: #6b7280; max-width: 600px; margin: 0 auto;">Find the right professional for your home repair needs</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px;">
+            {% for category in categories %}
+            <div onclick="filterByCategory('{{ category.name }}')" style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); text-align: center; cursor: pointer; transition: all 0.3s; border: 1px solid #f1f5f9;"
+                 onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)'" 
+                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.07)'">
+                <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: white; font-size: 1.5rem;">{{ category.icon }}</div>
+                <h3 style="font-weight: 600; margin-bottom: 10px; color: #1f2937;">{{ category.name }}</h3>
+                <p style="color: #6b7280; font-size: 0.9rem;">Professional {{ category.name|lower }} services</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Featured Services -->
+<section style="padding: 80px 20px; background: #f8fafc;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 60px;">
+            <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 15px; color: #1f2937;">Top-Rated Services</h2>
+            <p style="font-size: 1.1rem; color: #6b7280;">Highly recommended services by our community</p>
+        </div>
+
+        <div id="featured-services" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+            {% for service in featured_services %}
+            <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); transition: all 0.3s; border: 1px solid #f1f5f9;"
+                 onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)'" 
+                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.07)'">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="background: #3B82F6; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 500;">{{ service.category }}</span>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <span style="color: #fbbf24; font-size: 1.2rem;">★</span>
+                        <span style="font-weight: 600; color: #1f2937;">{{ service.rating }}</span>
+                        <span style="color: #6b7280; font-size: 0.9rem;">({{ service.reviews_count }})</span>
+                    </div>
+                </div>
+                <h3 style="font-weight: 600; margin-bottom: 12px; color: #1f2937; font-size: 1.2rem;">{{ service.title }}</h3>
+                <p style="color: #6b7280; margin-bottom: 20px; line-height: 1.5;">{{ service.description }}</p>
+                <!-- Index Page mein provider cards ya service listings ke andar -->
+<div class="providers-grid">
+    {% for service in services %}
+    <div class="service-card">
+        <!-- Provider information -->
+        <div class="provider-info">
+            <div class="provider-avatar">
+                {{ service.provider.first_name|first|upper }}{{ service.provider.last_name|first|upper }}
+            </div>
+            <div class="provider-details">
+                <h4>{{ service.provider.get_full_name }}</h4>
+                <p>{{ service.category.name }}</p>
+            </div>
+        </div>
+        
+        <!-- Provider Profile Link -->
+        <a href="{% url 'provider_profile' service.provider.id %}" class="view-profile-btn">
+            View Profile
+        </a>
+    </div>
+    {% endfor %}
+</div>
+                    <a href="{% url 'service_detail' service.id %}" style="background: #3B82F6; color: white; padding: 8px 20px; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; transition: all 0.3s; text-decoration: none;"
+                       onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3B82F6'">View Details</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div style="text-align: center; margin-top: 50px;">
+            <a href="{% url 'services' %}" style="background: #3B82F6; color: white; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s; display: inline-block;"
+               onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-1px)'" 
+               onmouseout="this.style.background='#3B82F6'; this.style.transform='translateY(0)'">View All Services</a>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us -->
+<section style="padding: 80px 20px; background: white;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 60px;">
+            <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 15px; color: #1f2937;">Why Choose FixFinder?</h2>
+            <p style="font-size: 1.1rem; color: #6b7280; max-width: 600px; margin: 0 auto;">We make it easy to find reliable professionals for all your home repair needs</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px;">
+            <div style="text-align: center;">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; color: white; font-size: 2rem;">✓</div>
+                <h3 style="font-weight: 600; margin-bottom: 15px; color: #1f2937; font-size: 1.3rem;">Verified Professionals</h3>
+                <p style="color: #6b7280; line-height: 1.6;">All service providers are background checked and verified for your safety and peace of mind.</p>
+            </div>
+
+            <div style="text-align: center;">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; color: white; font-size: 2rem;">⚡</div>
+                <h3 style="font-weight: 600; margin-bottom: 15px; color: #1f2937; font-size: 1.3rem;">Quick Response</h3>
+                <p style="color: #6b7280; line-height: 1.6;">Get responses within 2 hours for urgent requests. We understand your time is valuable.</p>
+            </div>
+
+            <div style="text-align: center;">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; color: white; font-size: 2rem;">★</div>
+                <h3 style="font-weight: 600; margin-bottom: 15px; color: #1f2937; font-size: 1.3rem;">Quality Guarantee</h3>
+                <p style="color: #6b7280; line-height: 1.6;">Satisfaction guaranteed with our 5-star rated services and money-back guarantee.</p>
+            </div>
+
+            <div style="text-align: center;">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #8b5cf6, #7c3aed); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; color: white; font-size: 2rem;">👥</div>
+                <h3 style="font-weight: 600; margin-bottom: 15px; color: #1f2937; font-size: 1.3rem;">Trusted Network</h3>
+                <p style="color: #6b7280; line-height: 1.6;">Join thousands of satisfied customers in your area who trust FixFinder.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section style="padding: 80px 20px; background: linear-gradient(135deg, #3B82F6, #1d4ed8); color: white; text-align: center;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 20px;">Ready to Get Started?</h2>
+        <p style="font-size: 1.2rem; margin-bottom: 40px; opacity: 0.9; line-height: 1.6;">Join thousands of satisfied customers who found the perfect service provider through FixFinder</p>
+        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+            <button onclick="checkAuthAndRedirect('{% url "post_service_request" %}')" style="background: #fbbf24; color: #1f2937; padding: 15px 35px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; font-size: 1.1rem;"
+                    onmouseover="this.style.background='#f59e0b'; this.style.transform='translateY(-2px)'" 
+                    onmouseout="this.style.background='#fbbf24'; this.style.transform='translateY(0)'">Post Your Request Now</button>
+            <a href="{% url 'services' %}" style="background: transparent; border: 2px solid white; color: white; padding: 13px 33px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: all 0.3s; display: inline-block; font-size: 1.1rem;"
+               onmouseover="this.style.background='white'; this.style.color='#3B82F6'; this.style.transform='translateY(-2px)'" 
+               onmouseout="this.style.background='transparent'; this.style.color='white'; this.style.transform='translateY(0)'">Browse Services</a>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer style="background: #1f2937; color: white; padding: 60px 20px 30px;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-bottom: 40px;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                    <div style="width: 40px; height: 40px; background: #3B82F6; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">F</div>
+                    <span style="font-size: 1.5rem; font-weight: bold;">FixFinder</span>
+                </div>
+                <p style="color: #9ca3af; line-height: 1.6; margin-bottom: 20px;">Your trusted platform for finding reliable household repair services. Connect with verified service providers in your area.</p>
+                <div style="display: flex; gap: 15px;">
+                    <div style="width: 40px; height: 40px; background: #374151; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.3s;"
+                         onmouseover="this.style.background='#3B82F6'" onmouseout="this.style.background='#374151'">f</div>
+                    <div style="width: 40px; height: 40px; background: #374151; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.3s;"
+                         onmouseover="this.style.background='#3B82F6'" onmouseout="this.style.background='#374151'">t</div>
+                    <div style="width: 40px; height: 40px; background: #374151; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.3s;"
+                         onmouseover="this.style.background='#3B82F6'" onmouseout="this.style.background='#374151'">i</div>
+                </div>
+            </div>
+
+            <div>
+                <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 20px;">Quick Links</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a href="{% url 'services' %}" style="color: #9ca3af; text-decoration: none; transition: color 0.3s;" 
+                       onmouseover="this.style.color='white'" onmouseout="this.style.color='#9ca3af'">Find Services</a>
+                    <a href="{% url 'post_service_request' %}" style="color: #9ca3af; text-decoration: none; transition: color 0.3s;" 
+                       onmouseover="this.style.color='white'" onmouseout="this.style.color='#9ca3af'">Post Request</a>
+                    <a href="{% url 'register' %}?type=provider" style="color: #9ca3af; text-decoration: none; transition: color 0.3s;" 
+                       onmouseover="this.style.color='white'" onmouseout="this.style.color='#9ca3af'">Become a Provider</a>
+                    <a href="{% url 'about' %}" style="color: #9ca3af; text-decoration: none; transition: color 0.3s;" 
+                       onmouseover="this.style.color='white'" onmouseout="this.style.color='#9ca3af'">About Us</a>
+                </div>
+            </div>
+
+            <div>
+                <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 20px;">Contact Info</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="color: #3B82F6;">📞</span>
+                        <span style="color: #9ca3af;">+91 98765 43210</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="color: #3B82F6;">✉️</span>
+                        <span style="color: #9ca3af;">support@fixfinder.com</span>
+                    </div>
+                    <div style="display: flex; align-items: flex-start; gap: 10px;">
+                        <span style="color: #3B82F6;">📍</span>
+                        <span style="color: #9ca3af;">123 Business District<br>Mumbai, Maharashtra 400001</span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 20px;">Categories</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    {% for category in categories|slice:":4" %}
+                    <a href="{% url 'services' %}?category={{ category.name }}" style="color: #9ca3af; text-decoration: none; transition: color 0.3s;" 
+                       onmouseover="this.style.color='white'" onmouseout="this.style.color='#9ca3af'">{{ category.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div style="border-top: 1px solid #374151; padding-top: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+            <p style="color: #9ca3af; margin: 0;">© 2025 FixFinder. All rights reserved.</p>
+            <div style="display: flex; gap: 30px;">
+                <a href="{% url 'privacy_policy' %}" style="color: #9ca3af; text-decoration: none; font-size: 0.9rem; transition: color 0.3s;" 
+                   onmouseover="this.style.color='white'" onmouseout="this.style.color='#9ca3af'">Privacy Policy</a>
+                <a href="{% url 'terms_of_service' %}" style="color: #9ca3af; text-decoration: none; font-size: 0.9rem; transition: color 0.3s;" 
+                   onmouseover="this.style.color='white'" onmouseout="this.style.color='#9ca3af'">Terms of Service</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+const isAuthenticated = '{{ user.is_authenticated|yesno:"true,false" }}';
+function checkAuthAndRedirect(url) {
+    if (isAuthenticated) {
+        window.location.href = url;
+    } else {
+        window.location.href = "{% url 'login' %}";
+    }
+}
+
+function searchServices() {
+    const service = document.getElementById('search-service').value;
+    const location = document.getElementById('search-location').value;
+    
+    let url = "{% url 'services' %}?";
+    if (service) url += `search=${encodeURIComponent(service)}&`;
+    if (location) url += `location=${encodeURIComponent(location)}&`;
+    
+    window.location.href = url;
+}
+
+function filterByCategory(category) {
+    window.location.href = `{% url 'services' %}?category=${category}`;
+}
+
+function toggleUserMenu() {
+    const dropdown = document.getElementById('dropdown-menu');
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('dropdown-menu');
+    if (dropdown && !event.target.closest('#auth-buttons')) {
+        dropdown.style.display = 'none';
+    }
+});
+
+// Handle Enter key in search
+document.getElementById('search-service').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        searchServices();
+    }
+});
+
+document.getElementById('search-location').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        searchServices();
+    }
+});
+</script>
+
+</body>
+</html>

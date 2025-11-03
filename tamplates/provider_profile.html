@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provider Profile - FixFinder</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #333;">
+
+<!-- Header -->
+<header style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: fixed; width: 100%; top: 0; z-index: 1000;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+        
+        <a href="{% url 'home' %}" style="text-decoration: none; display: flex; align-items: center; gap: 10px; cursor: pointer;">
+            <div style="width: 40px; height: 40px; background: #3B82F6; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">F</div>
+            <span style="font-size: 1.5rem; font-weight: bold; color: #3B82F6;">FixFinder</span>
+        </a>
+        
+        <nav style="display: flex; gap: 30px; align-items: center;" id="nav-menu">
+            <a href="{% url 'home' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Home</a>
+            <a href="{% url 'services' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Services</a>
+            <a href="{% url 'post_service_request' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Post Request</a>
+            <a href="{% url 'about' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">About</a>
+            <a href="{% url 'contact' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Contact</a>
+        </nav>
+
+        <div id="auth-buttons" style="display: flex; gap: 15px; align-items: center;">
+            {% if user.is_authenticated %}
+                <div id="user-menu" style="position: relative;">
+                    <button onclick="toggleUserMenu()" style="background: #f1f5f9; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <span id="user-name">{{ user.first_name|default:user.username }}</span>
+                        <span style="font-size: 12px;">▼</span>
+                    </button>
+                    <div id="dropdown-menu" style="display: none; position: absolute; right: 0; top: 100%; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 150px; z-index: 1001;">
+                        <a href="{% url 'dashboard' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b; border-bottom: 1px solid #e2e8f0;" 
+                           onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">Dashboard</a>
+                        <a href="{% url 'profile' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b; border-bottom: 1px solid #e2e8f0;" 
+                           onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">My Profile</a>
+                        <a href="{% url 'provider_profile' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #3B82F6; border-bottom: 1px solid #e2e8f0;" 
+                           onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">Provider Profile</a>
+                        <a href="{% url 'logout' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #dc2626;" 
+                           onmouseout="this.style.background='white'">Logout</a>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{% url 'login' %}" style="text-decoration: none; color: #3B82F6; font-weight: 500; padding: 8px 16px; transition: all 0.3s;" 
+                   onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">Login</a>
+                <a href="{% url 'register' %}" style="text-decoration: none; background: #3B82F6; color: white; padding: 8px 20px; border-radius: 8px; font-weight: 500; transition: all 0.3s;" 
+                   onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-1px)'" 
+                   onmouseout="this.style.background='#3B82F6'; this.style.transform='translateY(0)'">Register</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main style="padding: 100px 20px 40px; min-height: 100vh;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        
+        <!-- Page Header -->
+        <div style="margin-bottom: 40px;">
+            <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 10px; color: #1f2937;">Provider Profile</h1>
+            <p style="font-size: 1.1rem; color: #6b7280;">Manage your service provider profile and settings</p>
+        </div>
+
+        <!-- Django Messages -->
+        {% if messages %}
+            <div style="margin-bottom: 25px;">
+                {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                        <div style="padding: 12px; border-radius: 8px; margin-bottom: 10px; background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;">
+                            {{ message }}
+                        </div>
+                    {% elif message.tags == 'error' %}
+                        <div style="padding: 12px; border-radius: 8px; margin-bottom: 10px; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;">
+                            {{ message }}
+                        </div>
+                    {% elif message.tags == 'warning' %}
+                        <div style="padding: 12px; border-radius: 8px; margin-bottom: 10px; background: #fffbeb; color: #92400e; border: 1px solid #fcd34d;">
+                            {{ message }}
+                        </div>
+                    {% else %}
+                        <div style="padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div style="display: grid; grid-template-columns: 300px 1fr; gap: 30px;">
+            
+            <!-- Sidebar -->
+            <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: fit-content;">
+                <!-- Profile Summary -->
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #3B82F6, #1d4ed8); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">
+                        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                    </div>
+                    <h3 style="font-weight: 600; color: #1f2937; margin-bottom: 5px;">{{ user.get_full_name|default:user.username }}</h3>
+                    <p style="color: #6b7280; font-size: 0.9rem;">Service Provider</p>
+                    
+                    <!-- Verification Status -->
+                    <div style="background: #f0f9ff; padding: 8px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; margin-top: 10px;">
+                        <div style="width: 8px; height: 8px; background: #3B82F6; border-radius: 50%;"></div>
+                        <span style="color: #3B82F6; font-size: 0.8rem; font-weight: 500;">Verified Provider</span>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <nav style="display: flex; flex-direction: column; gap: 5px;">
+                    <a href="#profile-info" onclick="showSection('profile-info')" class="nav-link active" style="padding: 12px 16px; text-decoration: none; color: #3B82F6; background: #eff6ff; border-radius: 8px; font-weight: 500; display: flex; align-items: center; gap: 10px;">
+                        📝 Profile Information
+                    </a>
+                    <a href="#services" onclick="showSection('services')" class="nav-link" style="padding: 12px 16px; text-decoration: none; color: #64748b; border-radius: 8px; font-weight: 500; display: flex; align-items: center; gap: 10px; transition: all 0.3s;">
+                        🔧 Services & Skills
+                    </a>
+                    <a href="#availability" onclick="showSection('availability')" class="nav-link" style="padding: 12px 16px; text-decoration: none; color: #64748b; border-radius: 8px; font-weight: 500; display: flex; align-items: center; gap: 10px; transition: all 0.3s;">
+                        📅 Availability
+                    </a>
+                    <a href="#portfolio" onclick="showSection('portfolio')" class="nav-link" style="padding: 12px 16px; text-decoration: none; color: #64748b; border-radius: 8px; font-weight: 500; display: flex; align-items: center; gap: 10px; transition: all 0.3s;">
+                        🖼️ Portfolio
+                    </a>
+                    <a href="#reviews" onclick="showSection('reviews')" class="nav-link" style="padding: 12px 16px; text-decoration: none; color: #64748b; border-radius: 8px; font-weight: 500; display: flex; align-items: center; gap: 10px; transition: all 0.3s;">
+                        ⭐ Reviews & Ratings
+                    </a>
+                    <a href="#settings" onclick="showSection('settings')" class="nav-link" style="padding: 12px 16px; text-decoration: none; color: #64748b; border-radius: 8px; font-weight: 500; display: flex; align-items: center; gap: 10px; transition: all 0.3s;">
+                        ⚙️ Settings
+                    </a>
+                </nav>
+
+                <!-- Quick Stats -->
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                    <h4 style="font-weight: 600; color: #1f2937; margin-bottom: 15px; font-size: 1rem;">Quick Stats</h4>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: #6b7280; font-size: 0.9rem;">Completed Jobs</span>
+                            <span style="font-weight: 600; color: #1f2937;">{{ completed_jobs|default:"0" }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: #6b7280; font-size: 0.9rem;">Avg. Rating</span>
+                            <span style="font-weight: 600; color: #1f2937;">{{ avg_rating|default:"4.8" }}/5</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: #6b7280; font-size: 0.9rem;">Response Rate</span>
+                            <span style="font-weight: 600; color: #1f2937;">{{ response_rate|default:"95%" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div>
+                <!-- Profile Information Section -->
+                <div id="profile-info" class="content-section" style="display: block;">
+                    <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 25px;">
+                            <h2 style="font-size: 1.5rem; font-weight: 600; color: #1f2937;">Profile Information</h2>
+                            <button onclick="editProfile()" style="background: #3B82F6; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.3s;"
+                                    onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3B82F6'">
+                                Edit Profile
+                            </button>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+                            <div>
+                                <h3 style="font-weight: 600; color: #374151; margin-bottom: 15px; font-size: 1.1rem;">Personal Details</h3>
+                                <div style="display: flex; flex-direction: column; gap: 12px;">
+                                    <div>
+                                        <label style="display: block; color: #6b7280; font-size: 0.9rem; margin-bottom: 4px;">Full Name</label>
+                                        <p style="color: #1f2937; font-weight: 500;">{{ user.get_full_name|default:"Not set" }}</p>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; color: #6b7280; font-size: 0.9rem; margin-bottom: 4px;">Email</label>
+                                        <p style="color: #1f2937; font-weight: 500;">{{ user.email }}</p>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; color: #6b7280; font-size: 0.9rem; margin-bottom: 4px;">Phone</label>
+                                        <p style="color: #1f2937; font-weight: 500;">{{ user.phone|default:"Not set" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 style="font-weight: 600; color: #374151; margin-bottom: 15px; font-size: 1.1rem;">Business Information</h3>
+                                <div style="display: flex; flex-direction: column; gap: 12px;">
+                                    <div>
+                                        <label style="display: block; color: #6b7280; font-size: 0.9rem; margin-bottom: 4px;">Business Name</label>
+                                        <p style="color: #1f2937; font-weight: 500;">{{ provider_profile.business_name|default:"Individual Provider" }}</p>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; color: #6b7280; font-size: 0.9rem; margin-bottom: 4px;">Service Area</label>
+                                        <p style="color: #1f2937; font-weight: 500;">{{ provider_profile.service_area|default:"Not specified" }}</p>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; color: #6b7280; font-size: 0.9rem; margin-bottom: 4px;">Years of Experience</label>
+                                        <p style="color: #1f2937; font-weight: 500;">{{ provider_profile.experience_years|default:"0" }} years</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bio Section -->
+                        <div style="margin-top: 25px;">
+                            <h3 style="font-weight: 600; color: #374151; margin-bottom: 15px; font-size: 1.1rem;">About Me</h3>
+                            <p style="color: #6b7280; line-height: 1.6; background: #f8fafc; padding: 15px; border-radius: 8px;">
+                                {{ provider_profile.bio|default:"No bio provided. Add a description about your services and experience to attract more customers." }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Services & Skills Section -->
+                <div id="services" class="content-section" style="display: none;">
+                    <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        <h2 style="font-size: 1.5rem; font-weight: 600; color: #1f2937; margin-bottom: 25px;">Services & Skills</h2>
+                        
+                        <!-- Current Services -->
+                        <div style="margin-bottom: 30px;">
+                            <h3 style="font-weight: 600; color: #374151; margin-bottom: 15px; font-size: 1.1rem;">My Services</h3>
+                            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                                {% for service in services %}
+                                <div style="background: #eff6ff; color: #1d4ed8; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 500;">
+                                    {{ service.name }}
+                                </div>
+                                {% empty %}
+                                <p style="color: #6b7280;">No services added yet.</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Add New Service -->
+                        <div>
+                            <h3 style="font-weight: 600; color: #374151; margin-bottom: 15px; font-size: 1.1rem;">Add New Service</h3>
+                            <form style="display: grid; grid-template-columns: 1fr auto; gap: 10px;">
+                                <select style="padding: 10px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 0.9rem; outline: none;"
+                                        onfocus="this.style.borderColor='#3B82F6'" onblur="this.style.borderColor='#e5e7eb'">
+                                    <option value="">Select a service</option>
+                                    <option value="plumbing">Plumbing</option>
+                                    <option value="electrical">Electrical</option>
+                                    <option value="carpentry">Carpentry</option>
+                                    <option value="cleaning">Cleaning</option>
+                                    <option value="ac-repair">AC Repair</option>
+                                    <option value="appliance">Appliance Repair</option>
+                                </select>
+                                <button type="button" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500;"
+                                        onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
+                                    Add Service
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Availability Section -->
+                <div id="availability" class="content-section" style="display: none;">
+                    <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        <h2 style="font-size: 1.5rem; font-weight: 600; color: #1f2937; margin-bottom: 25px;">Availability Settings</h2>
+                        <p style="color: #6b7280; margin-bottom: 20px;">Set your working hours and availability for service requests.</p>
+                        
+                        <!-- Availability Calendar/Time Slots would go here -->
+                        <div style="background: #f8fafc; padding: 20px; border-radius: 8px; text-align: center;">
+                            <p style="color: #6b7280; margin-bottom: 15px;">Availability calendar feature coming soon</p>
+                            <button style="background: #3B82F6; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                                Set Availability
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add more sections for Portfolio, Reviews, Settings as needed -->
+                
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer style="background: #1f2937; color: white; padding: 40px 20px 20px; margin-top: 60px;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-bottom: 30px;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                    <div style="width: 40px; height: 40px; background: #3B82F6; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">F</div>
+                    <span style="font-size: 1.5rem; font-weight: bold;">FixFinder</span>
+                </div>
+                <p style="color: #9ca3af; line-height: 1.6;">Your trusted platform for finding reliable household repair services.</p>
+            </div>
+        </div>
+        <div style="border-top: 1px solid #374151; padding-top: 20px; text-align: center;">
+            <p style="color: #9ca3af; margin: 0;">© 2024 FixFinder. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+// Navigation functionality
+function showSection(sectionId) {
+    // Hide all sections
+    document.querySelectorAll('.content-section').forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Remove active class from all nav links
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.style.background = 'transparent';
+        link.style.color = '#64748b';
+    });
+    
+    // Show selected section
+    document.getElementById(sectionId).style.display = 'block';
+    
+    // Add active class to clicked nav link
+    event.target.style.background = '#eff6ff';
+    event.target.style.color = '#3B82F6';
+}
+
+// User menu functionality
+function toggleUserMenu() {
+    const dropdown = document.getElementById('dropdown-menu');
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const userMenu = document.getElementById('user-menu');
+    const dropdown = document.getElementById('dropdown-menu');
+    
+    if (userMenu && dropdown && !userMenu.contains(event.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+
+// Edit profile function
+function editProfile() {
+    alert('Edit profile feature will open a form to update your information.');
+    // In actual implementation, this would show an edit form
+}
+
+// Auto-hide messages after 5 seconds
+setTimeout(function() {
+    const messages = document.querySelectorAll('[style*="background: #d1fae5"], [style*="background: #fee2e2"]');
+    messages.forEach(message => {
+        message.style.display = 'none';
+    });
+}, 5000);
+</script>
+
+</body>
+</html>

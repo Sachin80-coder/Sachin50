@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - FixFinder</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #333;">
+
+<!-- Header -->
+<header style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: fixed; width: 100%; top: 0; z-index: 1000;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+        
+        <a href="{% url 'index' %}" style="text-decoration: none; display: flex; align-items: center; gap: 10px; cursor: pointer;">
+            <div style="width: 40px; height: 40px; background: #3B82F6; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">F</div>
+            <span style="font-size: 1.5rem; font-weight: bold; color: #3B82F6;">FixFinder</span>
+        </a>
+        
+        <nav style="display: flex; gap: 30px; align-items: center;" id="nav-menu">
+            <a href="{% url 'index' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Home</a>
+            <a href="{% url 'services' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Services</a>
+            <a href="{% url 'post_service_request' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Post Request</a>
+            <a href="{% url 'about' %}" style="text-decoration: none; color: #3B82F6; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#2563eb'" onmouseout="this.style.color='#3B82F6'">About</a>
+            <a href="{% url 'contact' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Contact</a>
+        </nav>
+
+        <div id="auth-buttons" style="display: flex; gap: 15px; align-items: center;">
+            {% if user.is_authenticated %}
+           <div style="position: relative;">
+            <button onclick="toggleUserMenu()" style="background: #f1f5f9; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <div style="width: 32px; height: 32px; background: #3B82F6; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">
+                    {{ user.first_name|default:user.username|first|upper }}
+                </div>
+                <span>{{ user.first_name|default:user.username }}</span>
+                <span style="font-size: 12px;">▼</span>
+            </button>
+                    <div id="dropdown-menu" style="display: none; position: absolute; right: 0; top: 100%; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 150px; z-index: 1001;">
+                        <a href="{% url 'dashboard' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b; border-bottom: 1px solid #e2e8f0;" 
+                           onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">Dashboard</a>
+                        <a href="{% url 'profile' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b; border-bottom: 1px solid #e2e8f0;" 
+                           onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">Profile</a>
+                        <a href="{% url 'logout' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #dc2626;" 
+                           onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'">Logout</a>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{% url 'login' %}" style="text-decoration: none; color: #3B82F6; font-weight: 500; padding: 8px 16px; transition: all 0.3s;" 
+                   onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">Login</a>
+                <a href="{% url 'register' %}" style="text-decoration: none; background: #3B82F6; color: white; padding: 8px 20px; border-radius: 8px; font-weight: 500; transition: all 0.3s;" 
+                   onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-1px)'" 
+                   onmouseout="this.style.background='#3B82F6'; this.style.transform='translateY(0)'">Register</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<!-- Hero Section -->
+<section style="background: linear-gradient(135deg, #3B82F6, #1d4ed8); color: white; padding: 120px 20px 80px; text-align: center; margin-top: 70px;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <h1 style="font-size: 3.5rem; font-weight: 700; margin-bottom: 20px; line-height: 1.2;">About FixFinder</h1>
+        <p style="font-size: 1.3rem; opacity: 0.9; max-width: 800px; margin: 0 auto; line-height: 1.6;">Connecting homeowners with trusted professionals for all their repair and maintenance needs</p>
+    </div>
+</section>
+
+<!-- Our Story Section -->
+<section style="padding: 80px 20px; background: white;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;">
+            <div>
+                <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 25px; color: #1f2937;">Our Story</h2>
+                <p style="font-size: 1.1rem; color: #6b7280; line-height: 1.7; margin-bottom: 20px;">
+                    FixFinder was born out of a simple frustration: finding reliable, trustworthy service providers for home repairs shouldn't be a stressful experience. Too often, homeowners struggle to find qualified professionals, worry about fair pricing, and question the quality of work.
+                </p>
+                <p style="font-size: 1.1rem; color: #6b7280; line-height: 1.7; margin-bottom: 20px;">
+                    Founded in 2024, we set out to create a platform that bridges the gap between homeowners needing repairs and skilled professionals looking to grow their businesses. We believe that every home deserves quality care, and every skilled worker deserves fair opportunities.
+                </p>
+                <p style="font-size: 1.1rem; color: #6b7280; line-height: 1.7;">
+                    Today, FixFinder serves thousands of customers across India, facilitating connections that result in fixed homes and thriving service businesses.
+                </p>
+            </div>
+            <div style="background: linear-gradient(135deg, #f0f9ff, #e0f2fe); padding: 40px; border-radius: 16px; text-align: center;">
+                <div style="font-size: 4rem; margin-bottom: 20px;">🏠</div>
+                <h3 style="font-size: 1.8rem; font-weight: 600; color: #1f2937; margin-bottom: 15px;">Our Mission</h3>
+                <p style="color: #6b7280; font-size: 1.1rem; line-height: 1.6;">
+                    To make home maintenance simple, reliable, and affordable by connecting homeowners with verified, skilled professionals in their area.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Values Section -->
+<section style="padding: 80px 20px; background: #f8fafc;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 60px;">
+            <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 20px; color: #1f2937;">Our Values</h2>
+            <p style="font-size: 1.2rem; color: #6b7280; max-width: 600px; margin: 0 auto;">The principles that guide everything we do</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
+            <div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); text-align: center; transition: transform 0.3s;"
+                 onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #3B82F6, #1d4ed8); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2rem;">✓</div>
+                <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 15px; color: #1f2937;">Trust & Safety</h3>
+                <p style="color: #6b7280; line-height: 1.6;">Every service provider is verified and background-checked to ensure your safety and peace of mind.</p>
+            </div>
+
+            <div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); text-align: center; transition: transform 0.3s;"
+                 onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981, #059669); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2rem;">🤝</div>
+                <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 15px; color: #1f2937;">Transparency</h3>
+                <p style="color: #6b7280; line-height: 1.6;">Clear pricing, honest reviews, and open communication between customers and service providers.</p>
+            </div>
+
+            <div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); text-align: center; transition: transform 0.3s;"
+                 onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2rem;">⚡</div>
+                <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 15px; color: #1f2937;">Quality Service</h3>
+                <p style="color: #6b7280; line-height: 1.6;">We maintain high standards and support both customers and providers to ensure excellent service delivery.</p>
+            </div>
+
+            <div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); text-align: center; transition: transform 0.3s;"
+                 onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2rem;">💡</div>
+                <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 15px; color: #1f2937;">Innovation</h3>
+                <p style="color: #6b7280; line-height: 1.6;">Continuously improving our platform with new features and technologies to serve you better.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section style="padding: 80px 20px; background: white;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 60px;">
+            <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 20px; color: #1f2937;">How FixFinder Works</h2>
+            <p style="font-size: 1.2rem; color: #6b7280;">Simple steps to get your home repairs done</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
+            <div style="text-align: center; position: relative;">
+                <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #3B82F6, #1d4ed8); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2.5rem; font-weight: bold;">1</div>
+                <h3 style="font-size: 1.4rem; font-weight: 600; margin-bottom: 15px; color: #1f2937;">Post Your Request</h3>
+                <p style="color: #6b7280; line-height: 1.6;">Describe your home repair needs, location, and preferred timeline. It takes just a few minutes.</p>
+            </div>
+
+            <div style="text-align: center; position: relative;">
+                <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #10b981, #059669); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2.5rem; font-weight: bold;">2</div>
+                <h3 style="font-size: 1.4rem; font-weight: 600; margin-bottom: 15px; color: #1f2937;">Get Matched</h3>
+                <p style="color: #6b7280; line-height: 1.6;">Verified service providers in your area will review your request and send you quotes and proposals.</p>
+            </div>
+
+            <div style="text-align: center; position: relative;">
+                <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2.5rem; font-weight: bold;">3</div>
+                <h3 style="font-size: 1.4rem; font-weight: 600; margin-bottom: 15px; color: #1f2937;">Choose & Book</h3>
+                <p style="color: #6b7280; line-height: 1.6;">Compare profiles, reviews, and quotes. Select the best professional and book their service directly.</p>
+            </div>
+
+            <div style="text-align: center; position: relative;">
+                <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2.5rem; font-weight: bold;">4</div>
+                <h3 style="font-size: 1.4rem; font-weight: 600; margin-bottom: 15px; color: #1f2937;">Get It Fixed</h3>
+                <p style="color: #6b7280; line-height: 1.6;">Your chosen professional completes the work. Rate and review their service to help future customers.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section style="padding: 80px 20px; background: linear-gradient(135deg, #3B82F6, #1d4ed8); color: white; text-align: center;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 20px;">FixFinder by the Numbers</h2>
+        <p style="font-size: 1.2rem; opacity: 0.9; margin-bottom: 50px;">Our impact in the home services industry</p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px;">
+            <div>
+                <div style="font-size: 3.5rem; font-weight: 700; margin-bottom: 10px;" class="stat-counter" data-target="10000">10,000+</div>
+                <p style="font-size: 1.1rem; opacity: 0.9;">Happy Customers</p>
+            </div>
+            <div>
+                <div style="font-size: 3.5rem; font-weight: 700; margin-bottom: 10px;" class="stat-counter" data-target="2500">2,500+</div>
+                <p style="font-size: 1.1rem; opacity: 0.9;">Verified Professionals</p>
+            </div>
+            <div>
+                <div style="font-size: 3.5rem; font-weight: 700; margin-bottom: 10px;" class="stat-counter" data-target="50000">50,000+</div>
+                <p style="font-size: 1.1rem; opacity: 0.9;">Services Completed</p>
+            </div>
+            <div>
+                <div style="font-size: 3.5rem; font-weight: 700; margin-bottom: 10px;">4.8/5</div>
+                <p style="font-size: 1.1rem; opacity: 0.9;">Average Rating</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section style="padding: 80px 20px; background: #f8fafc;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 60px;">
+            <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 20px; color: #1f2937;">Our Leadership Team</h2>
+            <p style="font-size: 1.2rem; color: #6b7280;">The people behind FixFinder</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
+            {% for member in team_members %}
+            <div style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); text-align: center;">
+                <div style="width: 120px; height: 120px; background: linear-gradient(135deg, #{{ member.color|default:"3B82F6" }}, #{{ member.color|default:"3B82F6" }}dd); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; font-weight: bold;">{{ member.initials }}</div>
+                <h3 style="font-size: 1.3rem; font-weight: 600; margin-bottom: 5px; color: #1f2937;">{{ member.name }}</h3>
+                <p style="color: #{{ member.color|default:"3B82F6" }}; font-weight: 500; margin-bottom: 15px;">{{ member.position }}</p>
+                <p style="color: #6b7280; font-size: 0.95rem; line-height: 1.6;">{{ member.description }}</p>
+            </div>
+            {% empty %}
+            <!-- Default team members if none provided -->
+            <div style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); text-align: center;">
+                <div style="width: 120px; height: 120px; background: linear-gradient(135deg, #3B82F6, #1d4ed8); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; font-weight: bold;">SS</div>
+                <h3 style="font-size: 1.3rem; font-weight: 600; margin-bottom: 5px; color: #1f2937;">Sachin Sonkamble</h3>
+                <p style="color: #3B82F6; font-weight: 500; margin-bottom: 15px;">CEO & Founder</p>
+                <p style="color: #6b7280; font-size: 0.95rem; line-height: 1.6;">Former tech executive with 15+ years in building marketplace platforms.</p>
+            </div>
+            <div style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); text-align: center;">
+                <div style="width: 120px; height: 120px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; font-weight: bold;">RS</div>
+                <h3 style="font-size: 1.3rem; font-weight: 600; margin-bottom: 5px; color: #1f2937;">Raj Shigavan</h3>
+                <p style="color: #10b981; font-weight: 500; margin-bottom: 15px;">CTO & Co-Founder</p>
+                <p style="color: #6b7280; font-size: 0.95rem; line-height: 1.6;">Technology leader with expertise in scalable platforms and mobile applications.</p>
+            </div>
+            <div style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); text-align: center;">
+                <div style="width: 120px; height: 120px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; font-weight: bold;">AY</div>
+                <h3 style="font-size: 1.3rem; font-weight: 600; margin-bottom: 5px; color: #1f2937;">Amar Yewate</h3>
+                <p style="color: #f59e0b; font-weight: 500; margin-bottom: 15px;">Head of Operations</p>
+                <p style="color: #6b7280; font-size: 0.95rem; line-height: 1.6;">Operations expert ensuring smooth service delivery and quality standards.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section style="padding: 80px 20px; background: white; text-align: center;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 20px; color: #1f2937;">Ready to Experience FixFinder?</h2>
+        <p style="font-size: 1.2rem; color: #6b7280; margin-bottom: 40px; line-height: 1.6;">Join thousands of satisfied customers who trust FixFinder for their home repair needs</p>
+        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+            <a href="{% url 'post_service_request' %}" style="background: #3B82F6; color: white; padding: 15px 35px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s; display: inline-block; font-size: 1.1rem;"
+               onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-2px)'" 
+               onmouseout="this.style.background='#3B82F6'; this.style.transform='translateY(0)'">Post Your Request</a>
+            <a href="{% url 'register' %}?user_type=provider" style="background: transparent; border: 2px solid #3B82F6; color: #3B82F6; padding: 13px 33px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s; display: inline-block; font-size: 1.1rem;"
+               onmouseover="this.style.background='#3B82F6'; this.style.color='white'; this.style.transform='translateY(-2px)'" 
+               onmouseout="this.style.background='transparent'; this.style.color='#3B82F6'; this.style.transform='translateY(0)'">Become a Provider</a>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer style="background: #1f2937; color: white; padding: 60px 20px 30px;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-bottom: 40px;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                    <div style="width: 40px; height: 40px; background: #3B82F6; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">F</div>
+                    <span style="font-size: 1.5rem; font-weight: bold;">FixFinder</span>
+                </div>
+                <p style="color: #9ca3af; line-height: 1.6; margin-bottom: 20px;">Your trusted platform for finding reliable household repair services. Connect with verified service providers in your area for all your home maintenance needs.</p>
+            </div>
+            
+            <div>
+                <h3 style="color: white; font-size: 1.2rem; font-weight: 600; margin-bottom: 20px;">Quick Links</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a href="{% url 'services' %}" style="color: #9ca3af; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='white'">Browse Services</a>
+                    <a href="{% url 'post_service_request' %}" style="color: #9ca3af; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='white'">Post a Request</a>
+                    <a href="{% url 'about' %}" style="color: #9ca3af; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='white'">About Us</a>
+                    <a href="{% url 'contact' %}" style="color: #9ca3af; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='white'">Contact</a>
+                </div>
+            </div>
+            
+            <div>
+                <h3 style="color: white; font-size: 1.2rem; font-weight: 600; margin-bottom: 20px;">Legal</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a href="{% url 'privacy_policy' %}" style="color: #9ca3af; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='white'">Privacy Policy</a>
+                    <a href="{% url 'terms_of_service' %}" style="color: #9ca3af; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='white'">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+        <div style="border-top: 1px solid #374151; padding-top: 30px; text-align: center;">
+            <p style="color: #9ca3af; margin: 0;">© 2024 FixFinder. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+// User menu functionality
+function toggleUserMenu() {
+    const dropdown = document.getElementById('dropdown-menu');
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const userMenu = document.getElementById('user-menu');
+    const dropdown = document.getElementById('dropdown-menu');
+    
+    if (userMenu && dropdown && !userMenu.contains(event.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+
+// Stats counter animation
+function animateStats() {
+    const counters = document.querySelectorAll('.stat-counter');
+    
+    counters.forEach(counter => {
+        const target = parseInt(counter.getAttribute('data-target'));
+        let current = 0;
+        const increment = target / 100;
+        const duration = 2000; // 2 seconds
+        const stepTime = duration / 100;
+        
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
+            }
+            counter.textContent = Math.floor(current).toLocaleString() + '+';
+        }, stepTime);
+    });
+}
+
+// Intersection Observer for stats animation
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            animateStats();
+            observer.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.5 });
+
+const statsSection = document.querySelector('section[style*="linear-gradient(135deg, #3B82F6, #1d4ed8)"]');
+if (statsSection) {
+    observer.observe(statsSection);
+}
+
+// Smooth scrolling for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+
+// Add loading animation for better UX
+document.addEventListener('DOMContentLoaded', function() {
+    // Add fade-in animation to sections
+    const sections = document.querySelectorAll('section');
+    sections.forEach(section => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(20px)';
+        section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    });
+
+    // Trigger animations
+    setTimeout(() => {
+        sections.forEach(section => {
+            section.style.opacity = '1';
+            section.style.transform = 'translateY(0)';
+        });
+    }, 100);
+});
+</script>
+</body>
+</html>

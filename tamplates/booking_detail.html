@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking #{{ booking.id }} - FixFinder</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc;">
+
+<!-- Header -->
+<header style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: fixed; width: 100%; top: 0; z-index: 1000;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="window.location.href='/'">
+            <div style="width: 40px; height: 40px; background: #3B82F6; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">F</div>
+            <span style="font-size: 1.5rem; font-weight: bold; color: #3B82F6;">FixFinder</span>
+        </div>
+        
+        <nav style="display: flex; gap: 30px; align-items: center;">
+            <a href="/" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Home</a>
+            <a href="{% url 'services' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Services</a>
+            <a href="{% url 'post_service_request' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Post Request</a>
+        </nav>
+
+        <div style="position: relative;">
+            {% if user.is_authenticated %}
+            <div style="position: relative;">
+            <button onclick="toggleUserMenu()" style="background: #f1f5f9; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <div style="width: 32px; height: 32px; background: #3B82F6; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">
+                    {{ user.first_name|default:user.username|first|upper }}
+                </div>
+                <span>{{ user.first_name|default:user.username }}</span>
+                <span style="font-size: 12px;">▼</span>
+            </button>
+            <div id="dropdown-menu" style="display: none; position: absolute; right: 0; top: 100%; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 180px; z-index: 1001;">
+                <a href="{% url 'dashboard' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b; border-bottom: 1px solid #e2e8f0;" 
+                   onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">Dashboard</a>
+                <a href="{% url 'profile' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b; border-bottom: 1px solid #e2e8f0;" 
+                   onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">Profile</a>
+                <a href="{% url 'profile_bookings' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b; border-bottom: 1px solid #e2e8f0;" 
+                   onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">My Bookings</a>
+                <a href="{% url 'logout' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #dc2626;" 
+                   onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'">Logout</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main style="margin-top: 80px; padding: 40px 20px;">
+    <div style="max-width: 1000px; margin: 0 auto;">
+        
+        <!-- Page Header -->
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 30px;">
+            <div>
+                <h1 style="font-size: 2.2rem; font-weight: 700; margin-bottom: 8px; color: #1f2937;">Booking Details</h1>
+                <p style="color: #6b7280; font-size: 1.1rem; margin-bottom: 0;">Booking ID: #{{ booking.id }}</p>
+            </div>
+            <div style="display: flex; gap: 15px;">
+                <a href="{% url 'profile_bookings' %}" style="background: #6b7280; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s;"
+                   onmouseover="this.style.background='#4b5563'" onmouseout="this.style.background='#6b7280'">
+                    ← Back to Bookings
+                </a>
+                {% if booking.status == 'completed' and user.user_type == 'customer' and not booking.review %}
+                <a href="{% url 'add_review' booking.id %}" style="background: #f59e0b; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s;"
+                   onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">
+                    ⭐ Write Review
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Django Messages -->
+        {% if messages %}
+        <div style="margin-bottom: 25px;">
+            {% for message in messages %}
+                {% if message.tags == 'error' %}
+                <div style="background: #fee2e2; color: #dc2626; padding: 12px; border-radius: 8px; border: 1px solid #fca5a5; text-align: center; margin-bottom: 10px;">
+                    {{ message }}
+                </div>
+                {% else %}
+                <div style="background: #d1fae5; color: #065f46; padding: 12px; border-radius: 8px; border: 1px solid #a7f3d0; text-align: center; margin-bottom: 10px;">
+                    {{ message }}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
+            
+            <!-- Left Column - Booking Details -->
+            <div>
+                <!-- Booking Status Card -->
+                <div style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); margin-bottom: 25px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="font-size: 1.5rem; font-weight: 600; color: #1f2937; margin: 0;">Booking Status</h2>
+                        <span style="background-color: 
+                            {% if booking.status == 'confirmed' %}#10b981
+                            {% elif booking.status == 'in_progress' %}#f59e0b
+                            {% elif booking.status == 'completed' %}#3B82F6
+                            {% elif booking.status == 'cancelled' %}#ef4444
+                            {% else %}#6b7280{% endif %}; 
+                            color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; text-transform: capitalize;">
+                            {{ booking.status }}
+                        </span>
+                    </div>
+                    
+                    <!-- Status Timeline -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; position: relative; margin: 25px 0;">
+                        <div style="position: absolute; top: 50%; left: 0; right: 0; height: 2px; background: #e5e7eb; transform: translateY(-50%); z-index: 1;"></div>
+                        
+                        <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; position: relative;">
+                            <div style="width: 20px; height: 20px; border-radius: 50%; background: #10b981; margin-bottom: 8px;"></div>
+                            <span style="font-size: 0.8rem; color: #10b981; font-weight: 500;">Booked</span>
+                        </div>
+                        
+                        <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; position: relative;">
+                            <div style="width: 20px; height: 20px; border-radius: 50%; background: {% if booking.status != 'pending' %}#10b981{% else %}#e5e7eb{% endif %}; margin-bottom: 8px;"></div>
+                            <span style="font-size: 0.8rem; color: {% if booking.status != 'pending' %}#10b981{% else %}#6b7280{% endif %}; font-weight: 500;">Confirmed</span>
+                        </div>
+                        
+                        <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; position: relative;">
+                            <div style="width: 20px; height: 20px; border-radius: 50%; background: {% if booking.status == 'in_progress' or booking.status == 'completed' %}#10b981{% else %}#e5e7eb{% endif %}; margin-bottom: 8px;"></div>
+                            <span style="font-size: 0.8rem; color: {% if booking.status == 'in_progress' or booking.status == 'completed' %}#10b981{% else %}#6b7280{% endif %}; font-weight: 500;">In Progress</span>
+                        </div>
+                        
+                        <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; position: relative;">
+                            <div style="width: 20px; height: 20px; border-radius: 50%; background: {% if booking.status == 'completed' %}#10b981{% else %}#e5e7eb{% endif %}; margin-bottom: 8px;"></div>
+                            <span style="font-size: 0.8rem; color: {% if booking.status == 'completed' %}#10b981{% else %}#6b7280{% endif %}; font-weight: 500;">Completed</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service Details -->
+                <div style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); margin-bottom: 25px;">
+                    <h2 style="font-size: 1.5rem; font-weight: 600; color: #1f2937; margin-bottom: 20px;">Service Details</h2>
+                    
+                    <div style="display: flex; align-items: start; gap: 20px; margin-bottom: 25px;">
+                        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #3B82F6, #1d4ed8); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
+                            {% if booking.service %}{{ booking.service.category.icon }}{% else %}🔧{% endif %}
+                        </div>
+                        <div style="flex: 1;">
+                            <h3 style="font-weight: 600; color: #1f2937; margin-bottom: 8px; font-size: 1.3rem;">
+                                {{ booking.service.title|default:booking.service_name }}
+                            </h3>
+                            <p style="color: #6b7280; margin-bottom: 12px; line-height: 1.5;">
+                                {{ booking.service.description|default:booking.service_description }}
+                            </p>
+                            <div style="display: flex; gap: 20px;">
+                                <span style="color: #6b7280;">
+                                    <strong>Category:</strong> 
+                                    {% if booking.service %}{{ booking.service.category.name }}{% else %}General Service{% endif %}
+                                </span>
+                                <span style="color: #6b7280;">
+                                    <strong>Experience:</strong> 
+                                    {% if booking.service %}{{ booking.service.experience }}{% else %}Professional{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Schedule & Location -->
+                <div style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); margin-bottom: 25px;">
+                    <h2 style="font-size: 1.5rem; font-weight: 600; color: #1f2937; margin-bottom: 20px;">Schedule & Location</h2>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+                        <div>
+                            <h4 style="font-weight: 600; color: #374151; margin-bottom: 15px; font-size: 1.1rem;">📅 Service Schedule</h4>
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <div style="display: flex; justify-content: between;">
+                                    <span style="color: #6b7280;">Date:</span>
+                                    <span style="font-weight: 500; color: #1f2937;">{{ booking.service_date|date:"F d, Y" }}</span>
+                                </div>
+                                <div style="display: flex; justify-content: between;">
+                                    <span style="color: #6b7280;">Time:</span>
+                                    <span style="font-weight: 500; color: #1f2937;">{{ booking.service_time|time:"g:i A" }}</span>
+                                </div>
+                                <div style="display: flex; justify-content: between;">
+                                    <span style="color: #6b7280;">Booked On:</span>
+                                    <span style="font-weight: 500; color: #1f2937;">{{ booking.booking_date|date:"M d, Y g:i A" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 style="font-weight: 600; color: #374151; margin-bottom: 15px; font-size: 1.1rem;">📍 Service Location</h4>
+                            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #3B82F6;">
+                                <p style="margin: 0; color: #1f2937; line-height: 1.5;">{{ booking.customer_address }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Special Instructions -->
+                {% if booking.special_instructions %}
+                <div style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07);">
+                    <h2 style="font-size: 1.5rem; font-weight: 600; color: #1f2937; margin-bottom: 20px;">Special Instructions</h2>
+                    <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; border-left: 4px solid #3B82F6;">
+                        <p style="margin: 0; color: #0369a1; line-height: 1.6;">{{ booking.special_instructions }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Right Column - Sidebar -->
+            <div>
+                <!-- User Information -->
+                <div style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); margin-bottom: 25px;">
+                    <h3 style="font-weight: 600; color: #1f2937; margin-bottom: 20px; font-size: 1.2rem;">
+                        {% if user.user_type == 'customer' %}Provider Details{% else %}Customer Details{% endif %}
+                    </h3>
+                    
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #3B82F6, #1d4ed8); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem;">
+                            {% if user.user_type == 'customer' %}
+                                {{ booking.provider.first_name.0 }}{{ booking.provider.last_name.0 }}
+                            {% else %}
+                                {{ booking.customer.first_name.0 }}{{ booking.customer.last_name.0 }}
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h4 style="font-weight: 600; color: #1f2937; margin-bottom: 5px;">
+                                {% if user.user_type == 'customer' %}
+                                    {{ booking.provider.get_full_name }}
+                                {% else %}
+                                    {{ booking.customer.get_full_name }}
+                                {% endif %}
+                            </h4>
+                            <p style="color: #6b7280; margin: 0; font-size: 0.9rem;">
+                                {% if user.user_type == 'customer' %}Service Provider{% else %}Customer{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="color: #6b7280;">📞</span>
+                            <span style="color: #374151; font-size: 0.9rem;">
+                                {% if user.user_type == 'customer' %}
+                                    {{ booking.provider.phone }}
+                                {% else %}
+                                    {{ booking.customer.phone }}
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="color: #6b7280;">✉️</span>
+                            <span style="color: #374151; font-size: 0.9rem;">
+                                {% if user.user_type == 'customer' %}
+                                    {{ booking.provider.email }}
+                                {% else %}
+                                    {{ booking.customer.email }}
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="color: #6b7280;">📍</span>
+                            <span style="color: #374151; font-size: 0.9rem;">
+                                {% if user.user_type == 'customer' %}
+                                    {{ booking.provider.location }}
+                                {% else %}
+                                    {{ booking.customer.location }}
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pricing Information -->
+                <div style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); margin-bottom: 25px;">
+                    <h3 style="font-weight: 600; color: #1f2937; margin-bottom: 20px; font-size: 1.2rem;">Pricing</h3>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div style="display: flex; justify-content: between; align-items: center;">
+                            <span style="color: #6b7280;">Service Price</span>
+                            <span style="font-weight: 600; color: #1f2937;">₹{{ booking.total_price }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: between; align-items: center;">
+                            <span style="color: #6b7280;">Taxes & Fees</span>
+                            <span style="font-weight: 500; color: #6b7280;">₹0</span>
+                        </div>
+                        <div style="border-top: 2px solid #e5e7eb; padding-top: 15px;">
+                            <div style="display: flex; justify-content: between; align-items: center;">
+                                <span style="font-weight: 700; color: #1f2937;">Total Amount</span>
+                                <span style="font-weight: 700; color: #3B82F6; font-size: 1.3rem;">₹{{ booking.total_price }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07);">
+                    <h3 style="font-weight: 600; color: #1f2937; margin-bottom: 20px; font-size: 1.2rem;">Actions</h3>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        {% if user.user_type == 'customer' %}
+                            {% if booking.status == 'confirmed' %}
+                            <a href="{% url 'contact_provider' booking.provider.id %}?service={{ booking.service.id }}" 
+                               style="background: #3B82F6; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 500; text-align: center; transition: all 0.3s;"
+                               onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3B82F6'">
+                                📞 Contact Provider
+                            </a>
+                            <a href="{% url 'cancel_booking' booking.id %}" 
+                               style="background: #ef4444; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 500; text-align: center; transition: all 0.3s;"
+                               onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
+                                ❌ Cancel Booking
+                            </a>
+                            {% elif booking.status == 'completed' and not booking.review %}
+                            <a href="{% url 'add_review' booking.id %}" 
+                               style="background: #f59e0b; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 500; text-align: center; transition: all 0.3s;"
+                               onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">
+                                ⭐ Write Review
+                            </a>
+                            {% endif %}
+                        {% else %}
+                            {% if booking.status == 'pending' %}
+                            <a href="{% url 'accept_booking' booking.id %}" 
+                               style="background: #10b981; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 500; text-align: center; transition: all 0.3s;"
+                               onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
+                                ✅ Accept Booking
+                            </a>
+                            <a href="{% url 'reject_booking' booking.id %}" 
+                               style="background: #ef4444; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 500; text-align: center; transition: all 0.3s;"
+                               onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
+                                ❌ Reject Booking
+                            </a>
+                            {% elif booking.status == 'confirmed' %}
+                            <a href="{% url 'update_booking_status' booking.id %}?status=in_progress" 
+                               style="background: #f59e0b; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 500; text-align: center; transition: all 0.3s;"
+                               onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">
+                                🚀 Start Service
+                            </a>
+                            {% elif booking.status == 'in_progress' %}
+                            <a href="{% url 'update_booking_status' booking.id %}?status=completed" 
+                               style="background: #10b981; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 500; text-align: center; transition: all 0.3s;"
+                               onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
+                                ✅ Complete Service
+                            </a>
+                            {% endif %}
+                            <a href="{% url 'contact_provider' booking.customer.id %}?service={{ booking.service.id }}" 
+                               style="background: #3B82F6; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 500; text-align: center; transition: all 0.3s;"
+                               onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3B82F6'">
+                                📞 Contact Customer
+                            </a>
+                        {% endif %}
+                        
+                        <a href="{% url 'profile_bookings' %}" 
+                           style="background: #6b7280; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 500; text-align: center; transition: all 0.3s;"
+                           onmouseover="this.style.background='#4b5563'" onmouseout="this.style.background='#6b7280'">
+                            ← Back to Bookings
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+function toggleUserMenu() {
+    const dropdown = document.getElementById('dropdown-menu');
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('dropdown-menu');
+    const button = dropdown?.previousElementSibling;
+    
+    if (dropdown && button && !button.contains(event.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+
+// Auto-hide messages after 5 seconds
+setTimeout(function() {
+    const messages = document.querySelectorAll('[style*="background: #d1fae5"], [style*="background: #fee2e2"]');
+    messages.forEach(message => {
+        message.style.display = 'none';
+    });
+}, 5000);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Account - FixFinder</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #fef2f2, #fee2e2); min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+
+<div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 500px; margin: 20px;">
+    
+    <!-- Warning Icon -->
+    <div style="text-align: center; margin-bottom: 25px;">
+        <div style="width: 80px; height: 80px; background: #ef4444; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2.5rem; font-weight: bold;">⚠️</div>
+        <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 10px; color: #1f2937;">Delete Your Account</h1>
+        <p style="color: #6b7280; font-size: 1.1rem; line-height: 1.6;">This action cannot be undone. Please read the information below carefully.</p>
+    </div>
+
+    <!-- Django Messages -->
+    {% if messages %}
+            <div style="margin-bottom: 25px;">
+                {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                        <div style="padding: 12px; border-radius: 8px; margin-bottom: 10px; background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;">
+                            {{ message }}
+                        </div>
+                    {% elif message.tags == 'error' %}
+                        <div style="padding: 12px; border-radius: 8px; margin-bottom: 10px; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;">
+                            {{ message }}
+                        </div>
+                    {% elif message.tags == 'warning' %}
+                        <div style="padding: 12px; border-radius: 8px; margin-bottom: 10px; background: #fffbeb; color: #92400e; border: 1px solid #fcd34d;">
+                            {{ message }}
+                        </div>
+                    {% else %}
+                        <div style="padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+    <!-- Warning Information -->
+    <div style="background: #fef2f2; padding: 25px; border-radius: 12px; border-left: 4px solid #ef4444; margin-bottom: 30px;">
+        <h3 style="font-weight: 600; color: #dc2626; margin-bottom: 15px; font-size: 1.2rem;">What will be deleted:</h3>
+        <ul style="color: #92400e; margin: 0; padding-left: 20px; line-height: 1.6;">
+            <li>Your personal profile information</li>
+            <li>All your service requests and bookings</li>
+            <li>Your reviews and ratings</li>
+            <li>Message history with service providers</li>
+            <li>Payment information and transaction history</li>
+            <li>All account preferences and settings</li>
+        </ul>
+    </div>
+
+    <!-- Alternative Options -->
+    <div style="background: #f0f9ff; padding: 20px; border-radius: 12px; border-left: 4px solid #3B82F6; margin-bottom: 30px;">
+        <h3 style="font-weight: 600; color: #0369a1; margin-bottom: 10px; font-size: 1.1rem;">Consider these alternatives:</h3>
+        <ul style="color: #0369a1; margin: 0; padding-left: 20px; line-height: 1.6; font-size: 0.9rem;">
+            <li><a href="{% url 'profile_settings' %}" style="color: #0369a1; text-decoration: underline;">Update your privacy settings</a></li>
+            <li><a href="{% url 'profile_edit' %}" style="color: #0369a1; text-decoration: underline;">Edit your profile information</a></li>
+            <li><a href="{% url 'profile_change_password' %}" style="color: #0369a1; text-decoration: underline;">Change your password</a></li>
+            <li>Contact support if you're experiencing issues</li>
+        </ul>
+    </div>
+
+    <!-- Confirmation Form -->
+    <form method="POST" onsubmit="return confirmAccountDeletion()">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 25px;">
+            <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #374151;">Please type "DELETE" to confirm:</label>
+            <input type="text" id="confirmation-text" name="confirmation_text" required 
+                   style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: all 0.3s; outline: none; box-sizing: border-box;"
+                   placeholder="Type DELETE here"
+                   onfocus="this.style.borderColor='#ef4444'" onblur="this.style.borderColor='#e5e7eb'">
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <button type="submit" id="delete-btn"
+                    style="width: 100%; background: #ef4444; color: white; padding: 14px; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s;"
+                    onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
+                Permanently Delete My Account
+            </button>
+            
+            <a href="{% url 'profile_settings' %}" 
+               style="background: #6b7280; color: white; padding: 14px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; text-decoration: none; text-align: center;"
+               onmouseover="this.style.background='#4b5563'" onmouseout="this.style.background='#6b7280'">
+                Cancel and Go Back
+            </a>
+        </div>
+    </form>
+
+    <!-- Contact Information -->
+    <div style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid #f1f5f9;">
+        <p style="color: #6b7280; font-size: 0.9rem; margin: 0;">
+            Need help? <a href="{% url 'contact' %}" style="color: #3B82F6; text-decoration: none;">Contact our support team</a>
+        </p>
+    </div>
+</div>
+
+<script>
+function confirmAccountDeletion() {
+    const confirmationText = document.getElementById('confirmation-text').value;
+    const deleteBtn = document.getElementById('delete-btn');
+    
+    if (confirmationText !== 'DELETE') {
+        alert('Please type "DELETE" exactly as shown to confirm account deletion.');
+        return false;
+    }
+    
+    const finalConfirmation = confirm(
+        'FINAL WARNING: This will permanently delete your account and all associated data. ' +
+        'This action cannot be undone. Are you absolutely sure you want to proceed?'
+    );
+    
+    if (finalConfirmation) {
+        deleteBtn.innerHTML = 'Deleting Account...';
+        deleteBtn.disabled = true;
+        deleteBtn.style.opacity = '0.7';
+        return true;
+    }
+    
+    return false;
+}
+
+// Auto-hide messages after 5 seconds
+setTimeout(function() {
+    const messages = document.querySelectorAll('[style*="background: #d1fae5"], [style*="background: #fee2e2"]');
+    messages.forEach(message => {
+        message.style.display = 'none';
+    });
+}, 5000);
+</script>
+
+</body>
+</html>

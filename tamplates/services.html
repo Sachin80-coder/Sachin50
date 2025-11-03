@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services - FixFinder</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #333;">
+
+<!-- Header -->
+<header style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: fixed; width: 100%; top: 0; z-index: 1000;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="window.location.href='/'">
+            <div style="width: 40px; height: 40px; background: #3B82F6; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">F</div>
+            <span style="font-size: 1.5rem; font-weight: bold; color: #3B82F6;">FixFinder</span>
+        </div>
+        
+        <nav style="display: flex; gap: 30px; align-items: center;">
+            <a href="/" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Home</a>
+            <a href="{% url 'services' %}" style="text-decoration: none; color: #3B82F6; font-weight: 500;">Services</a>
+            <a href="{% url 'post_service_request' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Post Request</a>
+            <a href="{% url 'about' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">About</a>
+            <a href="{% url 'contact' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Contact</a>
+        </nav>
+
+        <div>
+            {% if user.is_authenticated %}
+            <div style="position: relative;">
+            <button onclick="toggleUserMenu()" style="background: #f1f5f9; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <div style="width: 32px; height: 32px; background: #3B82F6; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">
+                    {{ user.first_name|default:user.username|first|upper }}
+                </div>
+                <span>{{ user.first_name|default:user.username }}</span>
+                <span style="font-size: 12px;">▼</span>
+            </button>
+                <div id="dropdown-menu" style="display: none; position: absolute; right: 0; top: 100%; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 180px; z-index: 1001;">
+                    <a href="{% url 'dashboard' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b; border-bottom: 1px solid #e2e8f0;" 
+                       onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">Dashboard</a>
+                    <a href="{% url 'profile' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b; border-bottom: 1px solid #e2e8f0;" 
+                       onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">Profile</a>
+                    <a href="{% url 'logout' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #dc2626;" 
+                       onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'">Logout</a>
+                </div>
+            </div>
+            {% else %}
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <a href="{% url 'login' %}" style="text-decoration: none; color: #3B82F6; font-weight: 500; padding: 8px 16px;">Login</a>
+                <a href="{% url 'register' %}" style="text-decoration: none; background: #3B82F6; color: white; padding: 8px 20px; border-radius: 8px; font-weight: 500;">Register</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<!-- Hero Section -->
+<section style="background: linear-gradient(135deg, #3B82F6, #1d4ed8); color: white; padding: 100px 20px 60px; text-align: center; margin-top: 70px;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <h1 style="font-size: 3rem; font-weight: 700; margin-bottom: 15px; line-height: 1.2;">Professional Services</h1>
+        <p style="font-size: 1.2rem; opacity: 0.9; max-width: 600px; margin: 0 auto 40px;">Find verified professionals for all your home repair and maintenance needs</p>
+        
+        <!-- Search Section -->
+        <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; gap: 15px; max-width: 700px; margin: 0 auto; flex-wrap: wrap; align-items: center;">
+            <input type="text" id="search-input" placeholder="Search services..." value="{{ request.GET.search }}"
+                   style="flex: 1; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; min-width: 200px; outline: none;"
+                   onfocus="this.style.borderColor='#3B82F6'" onblur="this.style.borderColor='#e2e8f0'">
+            <input type="text" id="location-input" placeholder="Location" value="{{ request.GET.location }}"
+                   style="flex: 1; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; min-width: 150px; outline: none;"
+                   onfocus="this.style.borderColor='#3B82F6'" onblur="this.style.borderColor='#e2e8f0'">
+            <button onclick="searchServices()" style="background: #F97316; color: white; padding: 12px 25px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;"
+                    onmouseover="this.style.background='#ea580c'" onmouseout="this.style.background='#F97316'">Search</button>
+        </div>
+    </div>
+</section>
+
+<!-- Filters Section -->
+<section style="padding: 30px 20px; background: white; border-bottom: 1px solid #e5e7eb;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+            <!-- Category Filters -->
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                <span style="color: #6b7280; font-weight: 500; margin-right: 10px;">Categories:</span>
+                <button onclick="filterByCategory('all')" id="filter-all" style="padding: 8px 16px; border: 2px solid #3B82F6; background: #3B82F6; color: white; border-radius: 20px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s;">All</button>
+                {% for category in categories %}
+                <button onclick="filterByCategory('{{ category.name }}')" id="filter-{{ category.name }}" style="padding: 8px 16px; border: 2px solid #e5e7eb; background: white; color: #6b7280; border-radius: 20px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s;">{{ category.name }}</button>
+                {% endfor %}
+            </div>
+
+            <!-- Sort & Results -->
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <select id="sort-select" onchange="sortServices()" style="padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; outline: none; cursor: pointer;">
+                    <option value="rating">Highest Rating</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="reviews">Most Reviews</option>
+                </select>
+                <span id="results-count" style="color: #6b7280; font-weight: 500;">{{ services|length }} services found</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Grid -->
+<section style="padding: 40px 20px;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div id="services-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px;">
+            {% for service in services %}
+            <div style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); transition: all 0.3s; border: 1px solid #f1f5f9; position: relative; overflow: hidden;"
+                 onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.15)'" 
+                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.07)'">
+                
+                <!-- Service Badge -->
+                <div style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #3B82F6, #1d4ed8); color: white; padding: 8px 16px; border-radius: 0 16px 0 16px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">{{ service.category.name }}</div>
+                
+                <!-- Provider Info -->
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding-top: 10px;">
+                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #3B82F6, #1d4ed8); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2rem;">{{ service.provider.first_name.0 }}</div>
+                    <div style="flex: 1;">
+                        <h4 style="font-weight: 600; margin-bottom: 3px; color: #1f2937; font-size: 1rem;">{{ service.provider.get_full_name }}</h4>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                                <div style="display: flex; gap: 1px;">
+                            {% with ''|center:5 as range %}
+                                {% for _ in range %}
+                                    {% if forloop.counter <= service.rating %}
+                                        <span style="color: #fbbf24; font-size: 0.9rem;">★</span>
+                                    {% else %}
+                                        <span style="color: #e5e7eb; font-size: 0.9rem;">★</span>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endwith %}
+                        </div>
+
+
+                            <span style="font-weight: 600; color: #1f2937; font-size: 0.9rem;">{{ service.rating }}</span>
+                            <span style="color: #6b7280; font-size: 0.8rem;">({{ service.reviews_count }})</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="color: #6b7280; font-size: 0.8rem;">📍 {{ service.location }}</span>
+                            <span style="background: #10b981; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7rem; font-weight: 500;">{{ service.availability }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Service Info -->
+                <div style="margin-bottom: 20px;">
+                    <h3 style="font-weight: 700; margin-bottom: 12px; color: #1f2937; font-size: 1.3rem; line-height: 1.3;">{{ service.title }}</h3>
+                    <p style="color: #6b7280; line-height: 1.5; font-size: 0.95rem; margin-bottom: 15px;">{{ service.description }}</p>
+                    
+                    <!-- Service Features -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;">
+                        <span style="background: #f0f9ff; color: #3B82F6; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 500;">✓ Verified</span>
+                        <span style="background: #f0fdf4; color: #10b981; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 500;">✓ Insured</span>
+                        <span style="background: #fffbeb; color: #f59e0b; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 500;">✓ {{ service.experience }}</span>
+                    </div>
+                </div>
+                
+                <!-- Price and Actions -->
+                <div style="border-top: 1px solid #f1f5f9; padding-top: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div style="color: #3B82F6; font-weight: 700; font-size: 1.4rem;">{{ service.price_range }}</div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            {% if user.is_authenticated %}
+                            {% for service in services %}
+    <a href="{% url 'contact_provider' service.provider.id %}"
+       style="background: #6b7280; color: white; padding: 8px 12px; border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer; transition: all 0.3s; text-decoration: none;"
+       onmouseover="this.style.background='#4b5563'"
+       onmouseout="this.style.background='#6b7280'">💬</a>
+
+    <button onclick="addToFavorites('{{ service.id }}')"
+            style="background: #f59e0b; color: white; padding: 8px 12px; border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer; transition: all 0.3s;"
+            onmouseover="this.style.background='#d97706'"
+            onmouseout="this.style.background='#f59e0b'">❤️</button>
+{% endfor %}
+
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <a href="{% url 'service_detail' service.id %}" style="flex: 1; background: transparent; border: 2px solid #3B82F6; color: #3B82F6; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; font-size: 0.95rem; text-decoration: none; text-align: center;"
+                           onmouseover="this.style.background='#3B82F6'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#3B82F6'">View Details</a>
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'book_service' service.id %}" style="flex: 1; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; font-size: 0.95rem; text-decoration: none; text-align: center;"
+                           onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)'" 
+                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">Book Now</a>
+                        {% else %}
+                        <a href="{% url 'login' %}" style="flex: 1; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; font-size: 0.95rem; text-decoration: none; text-align: center;"
+                           onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)'" 
+                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">Book Now</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- No Results -->
+        {% if not services %}
+        <div id="no-results" style="text-align: center; padding: 60px 20px;">
+            <div style="font-size: 4rem; margin-bottom: 20px;">🔍</div>
+            <h2 style="font-size: 1.8rem; font-weight: 600; margin-bottom: 15px; color: #1f2937;">No services found</h2>
+            <p style="color: #6b7280; font-size: 1.1rem; margin-bottom: 25px;">Try adjusting your search criteria</p>
+            <button onclick="clearFilters()" style="background: #3B82F6; color: white; padding: 12px 25px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Clear Filters</button>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Footer -->
+<footer style="background: #1f2937; color: white; padding: 60px 20px 30px;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-bottom: 40px;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                    <div style="width: 40px; height: 40px; background: #3B82F6; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">F</div>
+                    <span style="font-size: 1.5rem; font-weight: bold;">FixFinder</span>
+                </div>
+                <p style="color: #9ca3af; line-height: 1.6;">Your trusted platform for finding reliable household repair services.</p>
+            </div>
+        </div>
+        <div style="border-top: 1px solid #374151; padding-top: 30px; text-align: center;">
+            <p style="color: #9ca3af; margin: 0;">© 2025 FixFinder. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+function searchServices() {
+    const service = document.getElementById('search-input').value;
+    const location = document.getElementById('location-input').value;
+    
+    let url = "{% url 'services' %}?";
+    if (service) url += `search=${encodeURIComponent(service)}&`;
+    if (location) url += `location=${encodeURIComponent(location)}&`;
+    
+    window.location.href = url;
+}
+
+function filterByCategory(category) {
+    if (category === 'all') {
+        window.location.href = "{% url 'services' %}";
+    } else {
+        window.location.href = `{% url 'services' %}?category=${category}`;
+    }
+}
+
+function clearFilters() {
+    window.location.href = "{% url 'services' %}";
+}
+
+function toggleUserMenu() {
+    const dropdown = document.getElementById('dropdown-menu');
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('dropdown-menu');
+    if (dropdown && !event.target.closest('button')) {
+        dropdown.style.display = 'none';
+    }
+});
+
+// Event listeners
+document.getElementById('search-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') searchServices();
+});
+
+document.getElementById('location-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') searchServices();
+});
+
+// Initialize active filter
+document.addEventListener('DOMContentLoaded', function() {
+    const category = "{{ request.GET.category }}";
+    if (category) {
+        document.getElementById(`filter-${category}`).style.background = '#3B82F6';
+        document.getElementById(`filter-${category}`).style.color = 'white';
+        document.getElementById(`filter-${category}`).style.borderColor = '#3B82F6';
+    } else {
+        document.getElementById('filter-all').style.background = '#3B82F6';
+        document.getElementById('filter-all').style.color = 'white';
+        document.getElementById('filter-all').style.borderColor = '#3B82F6';
+    }
+});
+</script>
+
+</body>
+</html>

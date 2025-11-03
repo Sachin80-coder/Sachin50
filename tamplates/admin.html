@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - FixFinder</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc;">
+
+<!-- Header -->
+<header style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: fixed; width: 100%; top: 0; z-index: 1000;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 40px; height: 40px; background: #3B82F6; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">F</div>
+            <span style="font-size: 1.5rem; font-weight: bold; color: #3B82F6;">FixFinder Admin</span>
+        </div>
+        
+        <div style="display: flex; gap: 30px; align-items: center;">
+            <a href="/" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Home</a>
+            <a href="{% url 'services' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Services</a>
+        </div>
+
+        <div style="position: relative;">
+            <button onclick="toggleUserMenu()" style="background: #f1f5f9; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <span>{{ user.first_name }}</span>
+                <span style="font-size: 12px;">▼</span>
+            </button>
+            <div id="dropdown-menu" style="display: none; position: absolute; right: 0; top: 100%; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 150px; z-index: 1001;">
+                <a href="{% url 'profile' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b; border-bottom: 1px solid #e2e8f0;" 
+                   onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">Profile</a>
+                <a href="{% url 'logout' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #dc2626; border-bottom: 1px solid #e2e8f0;" 
+                   onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'">Logout</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main style="margin-top: 80px; padding: 40px 20px;">
+    <div style="max-width: 1400px; margin: 0 auto;">
+        <!-- Welcome Section -->
+        <div style="background: linear-gradient(135deg, #3B82F6, #1d4ed8); color: white; padding: 30px; border-radius: 16px; margin-bottom: 40px; text-align: center;">
+            <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 15px;">Admin Dashboard</h1>
+            <p style="font-size: 1.1rem; opacity: 0.9; margin-bottom: 0;">Manage your FixFinder platform</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 40px;">
+            <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); text-align: center; border-left: 4px solid #3B82F6;">
+                <div style="font-size: 2rem; margin-bottom: 10px;">👥</div>
+                <div style="font-size: 2rem; font-weight: 700; color: #3B82F6; margin-bottom: 5px;" id="total-users">{{ total_users }}</div>
+                <div style="color: #6b7280; font-weight: 500;">Total Users</div>
+            </div>
+            
+            <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); text-align: center; border-left: 4px solid #10b981;">
+                <div style="font-size: 2rem; margin-bottom: 10px;">🔧</div>
+                <div style="font-size: 2rem; font-weight: 700; color: #10b981; margin-bottom: 5px;" id="total-providers">{{ total_providers }}</div>
+                <div style="color: #6b7280; font-weight: 500;">Service Providers</div>
+            </div>
+            
+            <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); text-align: center; border-left: 4px solid #f59e0b;">
+                <div style="font-size: 2rem; margin-bottom: 10px;">🛠️</div>
+                <div style="font-size: 2rem; font-weight: 700; color: #f59e0b; margin-bottom: 5px;" id="total-services">{{ total_services }}</div>
+                <div style="color: #6b7280; font-weight: 500;">Total Services</div>
+            </div>
+            
+            <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); text-align: center; border-left: 4px solid #8b5cf6;">
+                <div style="font-size: 2rem; margin-bottom: 10px;">📋</div>
+                <div style="font-size: 2rem; font-weight: 700; color: #8b5cf6; margin-bottom: 5px;" id="total-bookings">{{ total_bookings }}</div>
+                <div style="color: #6b7280; font-weight: 500;">Total Bookings</div>
+            </div>
+            
+            <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); text-align: center; border-left: 4px solid #ef4444;">
+                <div style="font-size: 2rem; margin-bottom: 10px;">📨</div>
+                <div style="font-size: 2rem; font-weight: 700; color: #ef4444; margin-bottom: 5px;" id="total-requests">{{ total_requests }}</div>
+                <div style="color: #6b7280; font-weight: 500;">Service Requests</div>
+            </div>
+
+            <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); text-align: center; border-left: 4px solid #06b6d4;">
+                <div style="font-size: 2rem; margin-bottom: 10px;">💬</div>
+                <div style="font-size: 2rem; font-weight: 700; color: #06b6d4; margin-bottom: 5px;" id="total-messages">{{ total_messages }}</div>
+                <div style="color: #6b7280; font-weight: 500;">Contact Messages</div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div style="background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); margin-bottom: 30px;">
+            <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                <button onclick="showTab('users')" id="tab-users" style="padding: 10px 20px; border: 2px solid #3B82F6; background: #3B82F6; color: white; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s;">Users</button>
+                <button onclick="showTab('providers')" id="tab-providers" style="padding: 10px 20px; border: 2px solid #e5e7eb; background: white; color: #6b7280; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s;">Service Providers</button>
+                <button onclick="showTab('services')" id="tab-services" style="padding: 10px 20px; border: 2px solid #e5e7eb; background: white; color: #6b7280; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s;">Services</button>
+                <button onclick="showTab('bookings')" id="tab-bookings" style="padding: 10px 20px; border: 2px solid #e5e7eb; background: white; color: #6b7280; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s;">Bookings</button>
+                <button onclick="showTab('requests')" id="tab-requests" style="padding: 10px 20px; border: 2px solid #e5e7eb; background: white; color: #6b7280; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s;">Service Requests</button>
+                <button onclick="showTab('messages')" id="tab-messages" style="padding: 10px 20px; border: 2px solid #e5e7eb; background: white; color: #6b7280; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s;">Messages</button>
+            </div>
+        </div>
+
+        <!-- Tab Contents -->
+        <div style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07);">
+            <!-- Users Tab -->
+            <div id="content-users" style="display: block;">
+                <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 25px; color: #1f2937;">User Management</h2>
+                <div id="users-list">
+                    <!-- Users will be loaded here -->
+                    <p style="text-align: center; color: #6b7280; font-style: italic;">No users found</p>
+                </div>
+            </div>
+
+            <!-- Service Providers Tab -->
+            <div id="content-providers" style="display: none;">
+                <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 25px; color: #1f2937;">Service Providers</h2>
+                <div id="providers-list">
+                    <!-- Service providers will be loaded here -->
+                    <p style="text-align: center; color: #6b7280; font-style: italic;">No service providers found</p>
+                </div>
+            </div>
+
+            <!-- Services Tab -->
+            <div id="content-services" style="display: none;">
+                <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 25px; color: #1f2937;">Services Management</h2>
+                <div id="services-list">
+                    <!-- Services will be loaded here -->
+                    <p style="text-align: center; color: #6b7280; font-style: italic;">No services found</p>
+                </div>
+            </div>
+
+            <!-- Bookings Tab -->
+            <div id="content-bookings" style="display: none;">
+                <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 25px; color: #1f2937;">Bookings</h2>
+                <div id="bookings-list">
+                    <!-- Bookings will be loaded here -->
+                    <p style="text-align: center; color: #6b7280; font-style: italic;">No bookings found</p>
+                </div>
+            </div>
+
+            <!-- Service Requests Tab -->
+            <div id="content-requests" style="display: none;">
+                <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 25px; color: #1f2937;">Service Requests</h2>
+                <div id="requests-list">
+                    <!-- Service requests will be loaded here -->
+                    <p style="text-align: center; color: #6b7280; font-style: italic;">No service requests found</p>
+                </div>
+            </div>
+
+            <!-- Contact Messages Tab -->
+            <div id="content-messages" style="display: none;">
+                <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 25px; color: #1f2937;">Contact Messages</h2>
+                <div id="messages-list">
+                    <!-- Contact messages will be loaded here -->
+                    <p style="text-align: center; color: #6b7280; font-style: italic;">No contact messages found</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+let currentTab = 'users';
+
+function showTab(tabName) {
+    currentTab = tabName;
+    
+    // Update tab buttons
+    document.querySelectorAll('[id^="tab-"]').forEach(btn => {
+        btn.style.background = 'white';
+        btn.style.color = '#6b7280';
+        btn.style.borderColor = '#e5e7eb';
+    });
+    
+    document.getElementById(`tab-${tabName}`).style.background = '#3B82F6';
+    document.getElementById(`tab-${tabName}`).style.color = 'white';
+    document.getElementById(`tab-${tabName}`).style.borderColor = '#3B82F6';
+    
+    // Show/hide content
+    document.querySelectorAll('[id^="content-"]').forEach(content => {
+        content.style.display = 'none';
+    });
+    
+    document.getElementById(`content-${tabName}`).style.display = 'block';
+    
+    // In a real application, you would load the tab content via AJAX here
+}
+
+function toggleUserMenu() {
+    const dropdown = document.getElementById('dropdown-menu');
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('dropdown-menu');
+    const button = dropdown.previousElementSibling;
+    
+    if (!button.contains(event.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+</script>
+
+</body>
+</html>

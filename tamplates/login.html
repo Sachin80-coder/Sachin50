@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - FixFinder</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+
+<div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; margin: 20px;">
+    <!-- Header -->
+    <div style="text-align: center; margin-bottom: 30px;">
+        <div style="width: 60px; height: 60px; background: #3B82F6; color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 1.8rem; font-weight: bold;">F</div>
+        <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 8px; color: #1f2937;">Welcome Back</h1>
+        <p style="color: #6b7280; margin: 0;">Sign in to your FixFinder account</p>
+    </div>
+<!-- Messages -->
+    {% if messages %}
+<div style="margin-bottom: 20px;">
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+        <div style="background: #fee2e2; color: #dc2626; padding: 12px; border-radius: 8px; border: 1px solid #fca5a5; text-align: center; margin-bottom: 10px;">
+            {{ message }}
+        </div>
+        {% else %}
+        <div style="background: #d1fae5; color: #065f46; padding: 12px; border-radius: 8px; border: 1px solid #a7f3d0; text-align: center; margin-bottom: 10px;">
+            {{ message }}
+        </div>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endif %}  
+
+<form method="post" action="{% url 'login' %}" style="display: flex; flex-direction: column; gap: 20px;">
+    <!-- Login Form -->
+    <form method="post" action="{% url 'login' %}" style="display: flex; flex-direction: column; gap: 20px;">
+        {% csrf_token %}
+        
+        <div>
+            <label for="email" style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Email Address</label>
+            <input type="email" id="email" name="email" required 
+                   style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: all 0.3s; outline: none; box-sizing: border-box;"
+                   placeholder="Enter your email"
+                   onfocus="this.style.borderColor='#3B82F6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'" 
+                   onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+        </div>
+
+        <div>
+            <label for="password" style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Password</label>
+            <div style="position: relative;">
+                <input type="password" id="password" name="password" required 
+                       style="width: 100%; padding: 12px 45px 12px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: all 0.3s; outline: none; box-sizing: border-box;"
+                       placeholder="Enter your password"
+                       onfocus="this.style.borderColor='#3B82F6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'" 
+                       onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+                <button type="button" onclick="togglePassword()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #6b7280; cursor: pointer; padding: 4px; font-size: 1.2rem;"
+                        title="Show/Hide Password">👁️</button>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="remember" name="remember" style="width: 16px; height: 16px;">
+                <span style="color: #6b7280; font-size: 0.9rem;">Remember me</span>
+            </label>
+            <a href="{% url 'password_reset' %}" style="color: #3B82F6; text-decoration: none; font-size: 0.9rem; transition: color 0.3s;"
+               onmouseover="this.style.color='#2563eb'" onmouseout="this.style.color='#3B82F6'">Forgot Password?</a>
+        </div>
+
+        <button type="submit" 
+                style="width: 100%; background: #3B82F6; color: white; padding: 14px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; box-sizing: border-box;"
+                onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-1px)'" 
+                onmouseout="this.style.background='#3B82F6'; this.style.transform='translateY(0)'">
+            Sign In
+        </button>
+    </form>
+
+    <!-- Divider -->
+    <div style="margin: 30px 0; text-align: center; position: relative;">
+        <div style="height: 1px; background: #e5e7eb; margin: 20px 0;"></div>
+        <span style="background: white; padding: 0 20px; color: #6b7280; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">Don't have an account?</span>
+    </div>
+
+    <!-- Register Link -->
+    <a href="{% url 'register' %}" style="display: block; text-align: center; background: transparent; border: 2px solid #3B82F6; color: #3B82F6; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s;"
+       onmouseover="this.style.background='#3B82F6'; this.style.color='white'" 
+       onmouseout="this.style.background='transparent'; this.style.color='#3B82F6'">Create New Account</a>
+
+    <!-- Back to Home -->
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="/" style="color: #6b7280; text-decoration: none; font-size: 0.9rem; transition: color 0.3s;"
+           onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#6b7280'">← Back to Home</a>
+    </div>
+</div>
+
+<script>
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const toggleBtn = passwordInput.nextElementSibling;
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleBtn.innerHTML = '🙈';
+    } else {
+        passwordInput.type = 'password';
+        toggleBtn.innerHTML = '👁️';
+    }
+}
+
+// Handle Enter key
+document.getElementById('password').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        document.querySelector('form').submit();
+    }
+});
+</script>
+
+</body>
+</html>
+    
