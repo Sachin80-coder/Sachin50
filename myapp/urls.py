@@ -25,11 +25,12 @@ urlpatterns = [
     path('login/', views.user_login, name='login'),
     path('logout/', views.user_logout, name='logout'),
     
-    path('password-reset/', views.password_reset_request, name='password_reset'),
+  
     path('password-reset/done/', views.password_reset_done, name='password_reset_done'),
     path('password-reset/confirm/<uuid:token>/', views.password_reset_confirm, name='password_reset_confirm'),
     path('password-reset/complete/', views.password_reset_complete, name='password_reset_complete'),
-    
+    # Ek hi view ko do names de sakte hain
+    path('password-reset/', views.simple_password_reset, name='password_reset_simple'),
     # =======================================================
     # 3. User Dashboard & Profile Management
     # =======================================================
@@ -46,8 +47,13 @@ urlpatterns = [
     # Provider/Service Management
     path('service/add/', views.add_service, name='add_service'),
 
-    # Communication
-    path('provider/contact/<int:provider_id>/', views.contact_provider, name='contact_provider'),
+    # Add these URLs
+path('contact-provider/<int:provider_id>/', views.contact_provider, name='contact_provider'),
+path('add-review/<int:booking_id>/', views.add_review, name='add_review'),
+path('accept-booking/<int:booking_id>/', views.accept_booking, name='accept_booking'),
+path('reject-booking/<int:booking_id>/', views.reject_booking, name='reject_booking'),
+path('update-booking-status/<int:booking_id>/', views.update_booking_status, name='update_booking_status'),
+path('profile/bookings/', views.profile_bookings, name='profile_bookings'),
     
     # =======================================================
     # 4. Booking, Request & Review Management

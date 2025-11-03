@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Provider - FixFinder</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc;">
+
+<!-- Header (Same as booking_detail.html) -->
+<header style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: fixed; width: 100%; top: 0; z-index: 1000;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="window.location.href='/'">
+            <div style="width: 40px; height: 40px; background: #3B82F6; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">F</div>
+            <span style="font-size: 1.5rem; font-weight: bold; color: #3B82F6;">FixFinder</span>
+        </div>
+        
+        <nav style="display: flex; gap: 30px; align-items: center;">
+            <a href="/" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Home</a>
+            <a href="{% url 'services' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Services</a>
+        </nav>
+
+        <div style="position: relative;">
+            <button onclick="toggleUserMenu()" style="background: #f1f5f9; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <div style="width: 32px; height: 32px; background: #3B82F6; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">
+                    {{ user.first_name|default:user.username|first|upper }}
+                </div>
+                <span>{{ user.first_name|default:user.username }}</span>
+                <span style="font-size: 12px;">▼</span>
+            </button>
+            <div id="dropdown-menu" style="display: none; position: absolute; right: 0; top: 100%; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 180px; z-index: 1001;">
+                <a href="{% url 'dashboard' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b; border-bottom: 1px solid #e2e8f0;">Dashboard</a>
+                <a href="{% url 'profile' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b; border-bottom: 1px solid #e2e8f0;">Profile</a>
+                <a href="{% url 'logout' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #dc2626;">Logout</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main style="margin-top: 80px; padding: 40px 20px;">
+    <div style="max-width: 600px; margin: 0 auto;">
+        
+        <!-- Page Header -->
+        <div style="text-align: center; margin-bottom: 40px;">
+            <h1 style="font-size: 2.2rem; font-weight: 700; margin-bottom: 10px; color: #1f2937;">Contact Provider</h1>
+            <p style="color: #6b7280; font-size: 1.1rem;">Send a message to {{ provider.get_full_name }}</p>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div style="margin-bottom: 25px;">
+            {% for message in messages %}
+                {% if message.tags == 'error' %}
+                <div style="background: #fee2e2; color: #dc2626; padding: 12px; border-radius: 8px; border: 1px solid #fca5a5; text-align: center;">
+                    {{ message }}
+                </div>
+                {% else %}
+                <div style="background: #d1fae5; color: #065f46; padding: 12px; border-radius: 8px; border: 1px solid #a7f3d0; text-align: center;">
+                    {{ message }}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Contact Form -->
+        <div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07);">
+            <form method="POST">
+                {% csrf_token %}
+                
+                {% if service_id %}
+                <input type="hidden" name="service_id" value="{{ service_id }}">
+                {% endif %}
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Your Message</label>
+                    <textarea name="message" required rows="6" 
+                        style="width: 100%; padding: 15px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; resize: vertical; transition: all 0.3s; outline: none; box-sizing: border-box;"
+                        placeholder="Write your message to the provider..."
+                        onfocus="this.style.borderColor='#3B82F6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'" 
+                        onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'"></textarea>
+                </div>
+
+                <div style="display: flex; gap: 15px;">
+                    <button type="submit" 
+                        style="flex: 1; background: #3B82F6; color: white; padding: 15px; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s;"
+                        onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3B82F6'">
+                        Send Message
+                    </button>
+                    <a href="{% url 'profile_bookings' %}" 
+                        style="background: #6b7280; color: white; padding: 15px 25px; border-radius: 8px; text-decoration: none; font-weight: 600; text-align: center; transition: all 0.3s;"
+                        onmouseover="this.style.background='#4b5563'" onmouseout="this.style.background='#6b7280'">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Provider Info -->
+        <div style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); margin-top: 25px;">
+            <h3 style="font-weight: 600; color: #1f2937; margin-bottom: 20px;">Provider Information</h3>
+            
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #3B82F6, #1d4ed8); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem;">
+                    {{ provider.first_name.0 }}{{ provider.last_name.0 }}
+                </div>
+                <div>
+                    <h4 style="font-weight: 600; color: #1f2937; margin-bottom: 5px;">{{ provider.get_full_name }}</h4>
+                    <p style="color: #6b7280; margin: 0;">Service Provider</p>
+                </div>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="color: #6b7280;">📞</span>
+                    <span style="color: #374151;">{{ provider.phone }}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="color: #6b7280;">✉️</span>
+                    <span style="color: #374151;">{{ provider.email }}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="color: #6b7280;">📍</span>
+                    <span style="color: #374151;">{{ provider.location }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+function toggleUserMenu() {
+    const dropdown = document.getElementById('dropdown-menu');
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+}
+
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('dropdown-menu');
+    const button = dropdown?.previousElementSibling;
+    if (dropdown && button && !button.contains(event.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+
+// Auto-focus on message textarea
+document.querySelector('textarea').focus();
+</script>
+
+</body>
+</html>

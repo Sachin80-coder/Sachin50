@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Write Review - FixFinder</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc;">
+
+<!-- Header -->
+<header style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: fixed; width: 100%; top: 0; z-index: 1000;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="window.location.href='/'">
+            <div style="width: 40px; height: 40px; background: #3B82F6; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">F</div>
+            <span style="font-size: 1.5rem; font-weight: bold; color: #3B82F6;">FixFinder</span>
+        </div>
+        
+        <nav style="display: flex; gap: 30px; align-items: center;">
+            <a href="/" style="text-decoration: none; color: #64748b; font-weight: 500;">Home</a>
+            <a href="{% url 'services' %}" style="text-decoration: none; color: #64748b; font-weight: 500;">Services</a>
+        </nav>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main style="margin-top: 80px; padding: 40px 20px;">
+    <div style="max-width: 600px; margin: 0 auto;">
+        
+        <!-- Page Header -->
+        <div style="text-align: center; margin-bottom: 40px;">
+            <h1 style="font-size: 2.2rem; font-weight: 700; margin-bottom: 10px; color: #1f2937;">Write a Review</h1>
+            <p style="color: #6b7280; font-size: 1.1rem;">Share your experience with {{ booking.provider.get_full_name }}</p>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div style="margin-bottom: 25px;">
+            {% for message in messages %}
+                {% if message.tags == 'error' %}
+                <div style="background: #fee2e2; color: #dc2626; padding: 12px; border-radius: 8px; border: 1px solid #fca5a5; text-align: center;">
+                    {{ message }}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Review Form -->
+        <div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07);">
+            <!-- Service Info -->
+            <div style="background: #f0f9ff; padding: 20px; border-radius: 12px; margin-bottom: 30px;">
+                <h3 style="font-weight: 600; color: #0369a1; margin-bottom: 15px;">Service Details</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div>
+                        <span style="color: #64748b; font-size: 0.9rem;">Service:</span>
+                        <p style="font-weight: 600; color: #1f2937; margin: 5px 0;">{{ booking.service.title|default:booking.service_name }}</p>
+                    </div>
+                    <div>
+                        <span style="color: #64748b; font-size: 0.9rem;">Provider:</span>
+                        <p style="font-weight: 600; color: #1f2937; margin: 5px 0;">{{ booking.provider.get_full_name }}</p>
+                    </div>
+                    <div>
+                        <span style="color: #64748b; font-size: 0.9rem;">Date:</span>
+                        <p style="color: #1f2937; margin: 5px 0;">{{ booking.service_date|date:"M d, Y" }}</p>
+                    </div>
+                    <div>
+                        <span style="color: #64748b; font-size: 0.9rem;">Amount:</span>
+                        <p style="color: #1f2937; margin: 5px 0;">₹{{ booking.total_price }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+                
+                <!-- Rating -->
+                <div style="margin-bottom: 30px;">
+                    <label style="display: block; margin-bottom: 15px; font-weight: 600; color: #374151;">Your Rating</label>
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        {% for i in "12345" %}
+                        <input type="radio" name="rating" value="{{ i }}" id="star{{ i }}" style="display: none;">
+                        <label for="star{{ i }}" style="font-size: 2.5rem; cursor: pointer; color: #d1d5db; transition: color 0.3s;"
+                               onmouseover="highlightStars({{ i }})" 
+                               onclick="setRating({{ i }})">⭐</label>
+                        {% endfor %}
+                    </div>
+                    <div id="rating-text" style="text-align: center; margin-top: 10px; color: #6b7280; font-weight: 500;">
+                        Select your rating
+                    </div>
+                </div>
+
+                <!-- Comment -->
+                <div style="margin-bottom: 30px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Your Review (Optional)</label>
+                    <textarea name="comment" rows="4" 
+                        style="width: 100%; padding: 15px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; resize: vertical; transition: all 0.3s; outline: none; box-sizing: border-box;"
+                        placeholder="Share your experience with this service..."
+                        onfocus="this.style.borderColor='#3B82F6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'" 
+                        onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'"></textarea>
+                </div>
+
+                <div style="display: flex; gap: 15px;">
+                    <button type="submit" id="submit-btn" disabled
+                        style="flex: 1; background: #f59e0b; color: white; padding: 15px; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; opacity: 0.6;"
+                        onmouseover="if(!this.disabled) this.style.background='#d97706'" 
+                        onmouseout="if(!this.disabled) this.style.background='#f59e0b'">
+                        Submit Review
+                    </button>
+                    <a href="{% url 'booking_detail' booking.id %}" 
+                        style="background: #6b7280; color: white; padding: 15px 25px; border-radius: 8px; text-decoration: none; font-weight: 600; text-align: center; transition: all 0.3s;"
+                        onmouseover="this.style.background='#4b5563'" onmouseout="this.style.background='#6b7280'">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<script>
+let currentRating = 0;
+const ratingTexts = {
+    1: 'Poor - Very dissatisfied',
+    2: 'Fair - Could be better', 
+    3: 'Good - Met expectations',
+    4: 'Very Good - Exceeded expectations',
+    5: 'Excellent - Outstanding service'
+};
+
+function highlightStars(upTo) {
+    const stars = document.querySelectorAll('label[for^="star"]');
+    stars.forEach((star, index) => {
+        if (index < upTo) {
+            star.style.color = '#f59e0b';
+        } else {
+            star.style.color = '#d1d5db';
+        }
+    });
+}
+
+function setRating(rating) {
+    currentRating = rating;
+    const stars = document.querySelectorAll('label[for^="star"]');
+    stars.forEach((star, index) => {
+        if (index < rating) {
+            star.style.color = '#f59e0b';
+        } else {
+            star.style.color = '#d1d5db';
+        }
+    });
+    
+    document.getElementById('rating-text').textContent = ratingTexts[rating];
+    document.getElementById('rating-text').style.color = '#1f2937';
+    
+    // Enable submit button
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.disabled = false;
+    submitBtn.style.opacity = '1';
+}
+
+// Reset stars when mouse leaves if no rating selected
+document.querySelector('.stars-container')?.addEventListener('mouseleave', function() {
+    if (currentRating === 0) {
+        const stars = document.querySelectorAll('label[for^="star"]');
+        stars.forEach(star => {
+            star.style.color = '#d1d5db';
+        });
+    }
+});
+</script>
+
+</body>
+</html>

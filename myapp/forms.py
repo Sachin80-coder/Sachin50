@@ -1,9 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
-from django.contrib.auth.models import User
-# Aapke models ko yahan import kiya jaa raha hai. 
-# Maine assume kiya hai ki yeh saare models (.models) mein available hain.
+# Remove: from django.contrib.auth.models import User
 from .models import (
+    CustomUser,  # Add CustomUser import
     ContactMessage, 
     UserProfile, 
     ServiceRequest, 
@@ -50,7 +49,7 @@ class ContactForm(forms.ModelForm):
 
 # =======================================================
 # 2. Authentication and User Forms
-# (Using default User model, not CustomUser, as per original code)
+# (Updated to use CustomUser instead of default User)
 # =======================================================
 
 class CustomPasswordResetForm(PasswordResetForm):
@@ -63,15 +62,14 @@ class CustomPasswordResetForm(PasswordResetForm):
             'class': 'form-control',
             'placeholder': 'Enter your registered email',
             'required': True,
-            # Inline styles maintained as requested
             'style': 'width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: all 0.3s; outline: none; box-sizing: border-box;'
         })
     )
     
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        # NOTE: This validation uses django.contrib.auth.models.User
-        if not User.objects.filter(email=email, is_active=True).exists():
+        # FIXED: Use CustomUser instead of User
+        if not CustomUser.objects.filter(email=email, is_active=True).exists():
             raise forms.ValidationError("No account found with this email address.")
         return email
 
@@ -80,23 +78,19 @@ class CustomSetPasswordForm(SetPasswordForm):
     Custom form for setting a new password after successful reset link validation.
     Includes custom styling.
     """
-    # new_password1 field is defined in the base SetPasswordForm
     new_password1 = forms.CharField(
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
             'placeholder': 'Enter new password',
             'required': True,
-            # Inline styles maintained as requested
             'style': 'width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: all 0.3s; outline: none; box-sizing: border-box;'
         })
     )
-    # new_password2 field is defined in the base SetPasswordForm
     new_password2 = forms.CharField(
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
             'placeholder': 'Confirm new password',
             'required': True,
-            # Inline styles maintained as requested
             'style': 'width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: all 0.3s; outline: none; box-sizing: border-box;'
         })
     )
@@ -127,15 +121,17 @@ class UserProfileForm(forms.ModelForm):
 
 class UserForm(forms.ModelForm):
     """
-    Form for updating basic fields in the default Django User model.
+    Form for updating basic fields in the CustomUser model.
     """
     class Meta:
-        model = User
-        fields = ['first_name', 'last_name', 'email']
+        model = CustomUser  # FIXED: Use CustomUser instead of User
+        fields = ['first_name', 'last_name', 'email', 'phone', 'location']  # Added CustomUser fields
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'location': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
 class PasswordChangeForm(forms.Form):
@@ -173,7 +169,6 @@ class ServiceRequestForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Brief title for your service request',
                 'required': True,
-                # Inline styles maintained as requested
                 'style': 'width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;'
             }),
             'description': forms.Textarea(attrs={
@@ -181,38 +176,32 @@ class ServiceRequestForm(forms.ModelForm):
                 'placeholder': 'Describe the problem in detail...',
                 'rows': 4,
                 'required': True,
-                # Inline styles maintained as requested
                 'style': 'width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; resize: vertical;'
             }),
             'location': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Your area/city',
                 'required': True,
-                # Inline styles maintained as requested
                 'style': 'width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;'
             }),
             'urgency': forms.Select(attrs={
                 'class': 'form-control',
                 'required': True,
-                # Inline styles maintained as requested
                 'style': 'width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;'
             }),
             'budget': forms.Select(attrs={
                 'class': 'form-control',
-                # Inline styles maintained as requested
                 'style': 'width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;'
             }),
             'contact_name': forms.TextInput(attrs={
                 'class': 'form-control',
                 'required': True,
-                # Inline styles maintained as requested
                 'style': 'width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;'
             }),
             'contact_phone': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': '+91 9876543210',
                 'required': True,
-                # Inline styles maintained as requested
                 'style': 'width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;'
             }),
         }
@@ -258,41 +247,5 @@ class ServiceResponseForm(forms.ModelForm):
             'estimated_time': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'e.g., 2 hours, 1 day, etc.'
-            }),
-        }
-
-
-# forms.py
-from django import forms
-from .models import ServiceRequest
-
-class ServiceRequestForm(forms.ModelForm):
-    class Meta:
-        model = ServiceRequest
-        fields = ['category', 'title', 'description', 'location', 'budget', 'contact_name', 'contact_phone']
-        widgets = {
-            'title': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Brief title for your service request'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'form-control',
-                'placeholder': 'Describe your problem in detail...',
-                'rows': 4
-            }),
-            'location': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter your location'
-            }),
-            'budget': forms.Select(attrs={
-                'class': 'form-control'
-            }),
-            'contact_name': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Your full name'
-            }),
-            'contact_phone': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Your phone number'
             }),
         }

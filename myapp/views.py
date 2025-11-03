@@ -2,16 +2,16 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse 
 from django.core.mail import send_mail
 from django.conf import settings
-from django.db.models import Q, Avg, Count
+from django.db.models import Q, Avg, Count 
 from django.utils import timezone
 from django.views.generic import TemplateView
-from django.urls import reverse
+from django.urls import reverse 
 from django.core.paginator import Paginator
-from datetime import datetime, timedelta
-import json
+from datetime import datetime, timedelta 
+import random
 from .models import *
 from .forms import (
     ContactForm, 
@@ -447,6 +447,111 @@ def password_reset_request(request):
         form = CustomPasswordResetForm()
     
     return render(request, 'password_reset.html', {'form': form})
+
+
+
+def simple_password_reset(request):
+    """
+    Ek hi page mein complete password reset - aapke design ke saath
+    """
+    if request.method == 'POST':
+        # Step 1: Email submit
+        if 'email' in request.POST:
+            email = request.POST.get('email', '').strip().lower()
+            
+            if not email:
+                messages.error(request, 'Please enter your email address.')
+                return render(request, 'password_reset_simple.html')
+            
+            try:
+                user = CustomUser.objects.get(email=email, is_active=True)
+                
+                # Generate random 6-digit code
+                reset_code = str(random.randint(100000, 999999))
+                
+                # Save code in session (24 hours expiry)
+                request.session['reset_code'] = reset_code
+                request.session['reset_email'] = email
+                request.session.set_expiry(86400)  # 24 hours
+                
+                # Send email with code
+                send_mail(
+                    'Your FixFinder Password Reset Code',
+                    f'''
+Hello {user.first_name},
+
+Your password reset code is: {reset_code}
+
+Enter this code on the password reset page to set your new password.
+
+This code will expire in 24 hours.
+
+If you didn't request this reset, please ignore this email.
+
+Best regards,
+FixFinder Team
+                    ''',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [email],
+                    fail_silently=False,
+                )
+                
+                messages.success(request, f'Password reset code sent to {email}')
+                return render(request, 'password_reset_simple.html', {'show_code_form': True})
+                
+            except CustomUser.DoesNotExist:
+                messages.error(request, 'No account found with this email address.')
+                return render(request, 'password_reset_simple.html')
+        
+        # Step 2: Code verification and password reset
+        elif 'reset_code' in request.POST and 'new_password' in request.POST:
+            entered_code = request.POST.get('reset_code', '').strip()
+            new_password = request.POST.get('new_password', '')
+            confirm_password = request.POST.get('confirm_password', '')
+            
+            # Validate session data
+            if not all([request.session.get('reset_code'), request.session.get('reset_email')]):
+                messages.error(request, 'Reset session expired. Please start again.')
+                return redirect('simple_password_reset')
+            
+            # Validate code
+            if entered_code != request.session.get('reset_code'):
+                messages.error(request, 'Invalid reset code. Please try again.')
+                return render(request, 'password_reset_simple.html', {'show_code_form': True})
+            
+            # Validate passwords
+            if len(new_password) < 6:
+                messages.error(request, 'Password must be at least 6 characters long.')
+                return render(request, 'password_reset_simple.html', {'show_code_form': True})
+            
+            if new_password != confirm_password:
+                messages.error(request, 'Passwords do not match.')
+                return render(request, 'password_reset_simple.html', {'show_code_form': True})
+            
+            # Update password
+            try:
+                user = CustomUser.objects.get(email=request.session['reset_email'])
+                user.set_password(new_password)
+                user.save()
+                
+                # Clear session
+                request.session.flush()
+                
+                messages.success(request, 'Password reset successfully! You can now login with your new password.')
+                return redirect('login')
+                
+            except CustomUser.DoesNotExist:
+                messages.error(request, 'User not found. Please try again.')
+                return redirect('simple_password_reset')
+    
+    # Check if user has active reset session
+    show_code_form = bool(request.session.get('reset_code'))
+    
+    return render(request, 'password_reset_simple.html', {
+        'show_code_form': show_code_form
+    })
+
+
 
 def password_reset_confirm(request, token):
     """
@@ -1879,3 +1984,232 @@ def provider_profile(request):
     }
     
     return render(request, 'provider_profile.html', context)
+
+
+
+
+@login_required
+def contact_provider(request, provider_id):
+    """
+    Contact provider form and functionality
+    """
+    provider = get_object_or_404(CustomUser, id=provider_id, user_type='provider')
+    
+    if request.method == 'POST':
+        message = request.POST.get('message', '').strip()
+        service_id = request.POST.get('service_id')
+        
+        if not message:
+            messages.error(request, 'Please enter your message.')
+            return render(request, 'contact_provider.html', {'provider': provider})
+        
+        # Send email to provider
+        try:
+            send_mail(
+                f'New Message from {request.user.get_full_name()} - FixFinder',
+                f'''
+Message from: {request.user.get_full_name()}
+Email: {request.user.email}
+Phone: {request.user.phone}
+
+Message:
+{message}
+
+Service ID: {service_id if service_id else 'N/A'}
+
+Please respond to the customer at your earliest convenience.
+
+FixFinder Team
+                ''',
+                settings.DEFAULT_FROM_EMAIL,
+                [provider.email],
+                fail_silently=False,
+            )
+            
+            # Send confirmation to customer
+            send_mail(
+                'Message Sent Successfully - FixFinder',
+                f'''
+Your message has been sent to {provider.get_full_name()}.
+
+Message: {message}
+
+The provider will contact you soon.
+
+Thank you,
+FixFinder Team
+                ''',
+                settings.DEFAULT_FROM_EMAIL,
+                [request.user.email],
+                fail_silently=True,
+            )
+            
+            messages.success(request, f'Message sent to {provider.get_full_name()} successfully!')
+            return redirect('dashboard')
+            
+        except Exception as e:
+            messages.error(request, 'Failed to send message. Please try again.')
+    
+    return render(request, 'contact_provider.html', {
+        'provider': provider,
+        'service_id': request.GET.get('service', '')
+    })
+
+
+@login_required
+def add_review(request, booking_id):
+    """
+    Add review for completed booking
+    """
+    booking = get_object_or_404(Booking, id=booking_id, customer=request.user, status='completed')
+    
+    # Check if review already exists
+    if hasattr(booking, 'review'):
+        messages.error(request, 'You have already reviewed this booking.')
+        return redirect('booking_detail', booking_id=booking_id)
+    
+    if request.method == 'POST':
+        rating = request.POST.get('rating')
+        comment = request.POST.get('comment', '').strip()
+        
+        if not rating:
+            messages.error(request, 'Please select a rating.')
+            return render(request, 'add_review.html', {'booking': booking})
+        
+        try:
+            # Create review
+            review = Review.objects.create(
+                customer=request.user,
+                provider=booking.provider,
+                service=booking.service,
+                booking=booking,
+                rating=int(rating),
+                comment=comment,
+                is_approved=True
+            )
+            
+            # Send notification to provider
+            Notification.objects.create(
+                user=booking.provider,
+                title='New Review Received ⭐',
+                message=f'{request.user.get_full_name()} left a {rating}-star review for your service.',
+                notification_type='new_review'
+            )
+            
+            messages.success(request, 'Thank you for your review!')
+            return redirect('booking_detail', booking_id=booking_id)
+            
+        except Exception as e:
+            messages.error(request, 'Error submitting review. Please try again.')
+    
+    return render(request, 'add_review.html', {'booking': booking})
+
+
+
+
+@login_required
+def accept_booking(request, booking_id):
+    """
+    Provider accepts a booking
+    """
+    if request.user.user_type != 'provider':
+        messages.error(request, 'Only providers can accept bookings.')
+        return redirect('dashboard')
+    
+    booking = get_object_or_404(Booking, id=booking_id, provider=request.user, status='pending')
+    
+    booking.status = 'confirmed'
+    booking.save()
+    
+    # Send notification to customer
+    Notification.objects.create(
+        user=booking.customer,
+        title='Booking Confirmed ✅',
+        message=f'{request.user.get_full_name()} has accepted your booking request.',
+        notification_type='booking_accepted'
+    )
+    
+    # Send email to customer
+    try:
+        send_mail(
+            'Booking Confirmed - FixFinder',
+            f'''
+Hello {booking.customer.first_name},
+
+Great news! {request.user.get_full_name()} has accepted your booking request.
+
+Service: {booking.service.title if booking.service else booking.service_name}
+Date: {booking.service_date}
+Time: {booking.service_time}
+
+The provider will contact you soon to confirm the details.
+
+Thank you for choosing FixFinder!
+
+Best regards,
+FixFinder Team
+            ''',
+            settings.DEFAULT_FROM_EMAIL,
+            [booking.customer.email],
+            fail_silently=True,
+        )
+    except Exception as e:
+        print(f"Email sending failed: {e}")
+    
+    messages.success(request, 'Booking accepted successfully!')
+    return redirect('booking_detail', booking_id=booking_id)
+
+@login_required
+def reject_booking(request, booking_id):
+    """
+    Provider rejects a booking
+    """
+    if request.user.user_type != 'provider':
+        messages.error(request, 'Only providers can reject bookings.')
+        return redirect('dashboard')
+    
+    booking = get_object_or_404(Booking, id=booking_id, provider=request.user, status='pending')
+    
+    booking.status = 'cancelled'
+    booking.save()
+    
+    # Send notification to customer
+    Notification.objects.create(
+        user=booking.customer,
+        title='Booking Rejected',
+        message=f'{request.user.get_full_name()} has declined your booking request.',
+        notification_type='booking_rejected'
+    )
+    
+    messages.success(request, 'Booking rejected successfully!')
+    return redirect('profile_bookings')
+
+
+@login_required
+def update_booking_status(request, booking_id):
+    """
+    Update booking status (in_progress, completed)
+    """
+    booking = get_object_or_404(Booking, id=booking_id, provider=request.user)
+    
+    new_status = request.GET.get('status')
+    valid_statuses = ['in_progress', 'completed']
+    
+    if new_status not in valid_statuses:
+        messages.error(request, 'Invalid status update.')
+        return redirect('booking_detail', booking_id=booking_id)
+    
+    booking.status = new_status
+    booking.save()
+    
+    # Create notification for customer
+    status_text = 'started' if new_status == 'in_progress' else 'completed'
+    Notification.objects.create(
+        user=booking.customer,
+        title=f'Service {status_text.capitalize()}',
+        message=f'{request.user.get_full_name()} has {status_text} your service.',
+        notification_type='status_update'
+    )
+    
+    messages.success(request, f'Booking status updated to {new_status.replace("_", " ")}!')
+    return redirect('booking_detail', booking_id=booking_id)

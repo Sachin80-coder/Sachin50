@@ -10,17 +10,35 @@
 <!-- Header -->
 <header style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: fixed; width: 100%; top: 0; z-index: 1000;">
     <div style="max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="window.location.href='{% url 'home' %}'">
+        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="window.location.href='/'">
             <div style="width: 40px; height: 40px; background: #3B82F6; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">F</div>
             <span style="font-size: 1.5rem; font-weight: bold; color: #3B82F6;">FixFinder</span>
         </div>
         
         <nav style="display: flex; gap: 30px; align-items: center;">
-            <a href="{% url 'dashboard' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
-               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Dashboard</a>
-            <a href="{% url 'profile' %}" style="text-decoration: none; color: #3B82F6; font-weight: 500; transition: color 0.3s;" 
-               onmouseover="this.style.color='#2563eb'" onmouseout="this.style.color='#3B82F6'">Profile</a>
+            <a href="/" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Home</a>
+            <a href="{% url 'services' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Services</a>
+            <a href="{% url 'post_service_request' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+               onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Post Request</a>
         </nav>
+
+        <div style="position: relative;">
+            <button onclick="toggleUserMenu()" style="background: #f1f5f9; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <div style="width: 32px; height: 32px; background: #3B82F6; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">
+                    {{ user.first_name|default:user.username|first|upper }}
+                </div>
+                <span>{{ user.first_name|default:user.username }}</span>
+                <span style="font-size: 12px;">▼</span>
+            </button>
+            <div id="dropdown-menu" style="display: none; position: absolute; right: 0; top: 100%; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 180px; z-index: 1001;">
+                <a href="{% url 'dashboard' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b; border-bottom: 1px solid #e2e8f0;">Dashboard</a>
+                <a href="{% url 'profile' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #64748b; border-bottom: 1px solid #e2e8f0;">Profile</a>
+                <a href="{% url 'profile_bookings' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #3B82F6; border-bottom: 1px solid #e2e8f0; font-weight: 600;">My Bookings</a>
+                <a href="{% url 'logout' %}" style="display: block; padding: 12px 16px; text-decoration: none; color: #dc2626;">Logout</a>
+            </div>
+        </div>
     </div>
 </header>
 
@@ -29,126 +47,253 @@
     <div style="max-width: 1200px; margin: 0 auto;">
         
         <!-- Page Header -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
             <div>
-                <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 5px; color: #1f2937;">
-                    My Bookings
+                <h1 style="font-size: 2.2rem; font-weight: 700; margin-bottom: 8px; color: #1f2937;">
+                    {% if user.user_type == 'customer' %}My Bookings{% else %}Service Bookings{% endif %}
                 </h1>
                 <p style="color: #6b7280; font-size: 1.1rem; margin: 0;">
-                    {{ total_bookings }} total bookings
+                    Total {{ total_bookings }} booking{{ total_bookings|pluralize }}
                 </p>
             </div>
             
-            <!-- Filter Buttons -->
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <a href="?status=all" style="padding: 10px 20px; border: 2px solid {% if status_filter == 'all' %} #3B82F6 {% else %} #e5e7eb {% endif %}; background: {% if status_filter == 'all' %} #3B82F6 {% else %} white {% endif %}; color: {% if status_filter == 'all' %} white {% else %} #6b7280 {% endif %}; border-radius: 20px; font-size: 0.9rem; cursor: pointer; text-decoration: none; font-weight: {% if status_filter == 'all' %} 600 {% else %} 500 {% endif %}; transition: all 0.3s;">All</a>
-                <a href="?status=confirmed" style="padding: 10px 20px; border: 2px solid {% if status_filter == 'confirmed' %} #10b981 {% else %} #e5e7eb {% endif %}; background: {% if status_filter == 'confirmed' %} #10b981 {% else %} white {% endif %}; color: {% if status_filter == 'confirmed' %} white {% else %} #6b7280 {% endif %}; border-radius: 20px; font-size: 0.9rem; cursor: pointer; text-decoration: none; font-weight: {% if status_filter == 'confirmed' %} 600 {% else %} 500 {% endif %}; transition: all 0.3s;">Confirmed</a>
-                <a href="?status=active" style="padding: 10px 20px; border: 2px solid {% if status_filter == 'active' %} #f59e0b {% else %} #e5e7eb {% endif %}; background: {% if status_filter == 'active' %} #f59e0b {% else %} white {% endif %}; color: {% if status_filter == 'active' %} white {% else %} #6b7280 {% endif %}; border-radius: 20px; font-size: 0.9rem; cursor: pointer; text-decoration: none; font-weight: {% if status_filter == 'active' %} 600 {% else %} 500 {% endif %}; transition: all 0.3s;">Active</a>
-                <a href="?status=completed" style="padding: 10px 20px; border: 2px solid {% if status_filter == 'completed' %} #3B82F6 {% else %} #e5e7eb {% endif %}; background: {% if status_filter == 'completed' %} #3B82F6 {% else %} white {% endif %}; color: {% if status_filter == 'completed' %} white {% else %} #6b7280 {% endif %}; border-radius: 20px; font-size: 0.9rem; cursor: pointer; text-decoration: none; font-weight: {% if status_filter == 'completed' %} 600 {% else %} 500 {% endif %}; transition: all 0.3s;">Completed</a>
-                <a href="?status=cancelled" style="padding: 10px 20px; border: 2px solid {% if status_filter == 'cancelled' %} #ef4444 {% else %} #e5e7eb {% endif %}; background: {% if status_filter == 'cancelled' %} #ef4444 {% else %} white {% endif %}; color: {% if status_filter == 'cancelled' %} white {% else %} #6b7280 {% endif %}; border-radius: 20px; font-size: 0.9rem; cursor: pointer; text-decoration: none; font-weight: {% if status_filter == 'cancelled' %} 600 {% else %} 500 {% endif %}; transition: all 0.3s;">Cancelled</a>
+            <!-- Status Filter -->
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <span style="color: #6b7280; font-weight: 500;">Filter:</span>
+                <select onchange="window.location.href='?status='+this.value" 
+                    style="padding: 10px 15px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; outline: none; cursor: pointer;">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Bookings</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                    <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+                    <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                    <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                </select>
             </div>
         </div>
 
+        <!-- Messages -->
+        {% if messages %}
+        <div style="margin-bottom: 25px;">
+            {% for message in messages %}
+                {% if message.tags == 'error' %}
+                <div style="background: #fee2e2; color: #dc2626; padding: 12px; border-radius: 8px; border: 1px solid #fca5a5; text-align: center;">
+                    {{ message }}
+                </div>
+                {% else %}
+                <div style="background: #d1fae5; color: #065f46; padding: 12px; border-radius: 8px; border: 1px solid #a7f3d0; text-align: center;">
+                    {{ message }}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <!-- Bookings List -->
-        <div style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07);">
-            {% if page_obj %}
-                <div style="display: flex; flex-direction: column; gap: 20px;">
-                    {% for booking in page_obj %}
-                    <div style="border: 1px solid #e5e7eb; padding: 25px; border-radius: 16px; transition: all 0.3s;"
-                         onmouseover="this.style.borderColor='#3B82F6'; this.style.background='#f8fafc'" 
-                         onmouseout="this.style.borderColor='#e5e7eb'; this.style.background='white'">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
-                            <div style="flex: 1;">
-                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                                    <h4 style="font-weight: 700; color: #1f2937; font-size: 1.2rem; margin: 0;">{{ booking.service_name }}</h4>
-                                    <span style="background: 
-                                        {% if booking.status == 'confirmed' %} #10b981
-                                        {% elif booking.status == 'active' %} #f59e0b
-                                        {% elif booking.status == 'completed' %} #3B82F6
-                                        {% elif booking.status == 'cancelled' %} #ef4444
-                                        {% else %} #6b7280 {% endif %}; 
-                                        color: white; padding: 4px 12px; border-radius: 15px; font-size: 0.8rem; font-weight: 500; text-transform: capitalize;">
-                                        {{ booking.status }}
-                                    </span>
-                                </div>
-                                <p style="color: #6b7280; margin-bottom: 8px;">
+        {% if page_obj.object_list %}
+        <div style="display: grid; gap: 20px;">
+            {% for booking in page_obj.object_list %}
+            <div style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); transition: all 0.3s;"
+                 onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 15px rgba(0,0,0,0.1)'"
+                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.07)'">
+                
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #3B82F6, #1d4ed8); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                                {% if booking.service %}{{ booking.service.category.icon|default:"🔧" }}{% else %}🔧{% endif %}
+                            </div>
+                            <div>
+                                <h3 style="font-weight: 600; color: #1f2937; margin-bottom: 5px; font-size: 1.3rem;">
+                                    {{ booking.service.title|default:booking.service_name }}
+                                </h3>
+                                <p style="color: #6b7280; margin: 0; font-size: 1rem;">
                                     {% if user.user_type == 'customer' %}
-                                        Provider: {{ booking.provider.get_full_name|default:booking.provider.username }}
+                                        with {{ booking.provider.get_full_name }}
                                     {% else %}
-                                        Customer: {{ booking.customer.get_full_name|default:booking.customer.username }}
+                                        for {{ booking.customer.get_full_name }}
                                     {% endif %}
                                 </p>
-                                <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 8px;">
-                                    <span style="color: #6b7280; font-size: 0.9rem;">📅 {{ booking.service_date }}</span>
-                                    <span style="color: #6b7280; font-size: 0.9rem;">🕒 {{ booking.service_time }}</span>
-                                </div>
-                                <p style="color: #6b7280; font-size: 0.9rem; margin: 0;">📍 {{ booking.customer_address }}</p>
-                            </div>
-                            <div style="text-align: right;">
-                                <p style="margin: 0 0 8px 0; font-weight: 700; color: #3B82F6; font-size: 1.3rem;">₹{{ booking.total_price }}</p>
-                                <p style="margin: 0; color: #6b7280; font-size: 0.8rem;">Booked {{ booking.booking_date|date:"M d, Y" }}</p>
                             </div>
                         </div>
                         
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid #f1f5f9;">
-                            <div style="display: flex; gap: 10px;">
-                                {% if booking.status == 'completed' and user.user_type == 'customer' %}
-                                    <a href="{% url 'add_review' booking.id %}" style="background: #f59e0b; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; text-decoration: none; transition: all 0.3s;"
-                                       onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">⭐ Write Review</a>
-                                {% endif %}
-                                {% if booking.status == 'confirmed' %}
-                                    <a href="{% url 'cancel_booking' booking.id %}" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; text-decoration: none; transition: all 0.3s;"
-                                       onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">❌ Cancel</a>
-                                {% endif %}
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                            <div>
+                                <span style="color: #6b7280; font-size: 0.9rem;">Date & Time</span>
+                                <p style="font-weight: 500; color: #1f2937; margin: 5px 0;">
+                                    {{ booking.service_date|date:"M d, Y" }} at {{ booking.service_time|time:"g:i A" }}
+                                </p>
                             </div>
-                            <a href="{% url 'booking_detail' booking.id %}" style="background: transparent; border: 1px solid #3B82F6; color: #3B82F6; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; text-decoration: none; transition: all 0.3s;"
-                               onmouseover="this.style.background='#3B82F6'; this.style.color='white'" 
-                               onmouseout="this.style.background='transparent'; this.style.color='#3B82F6'">View Details</a>
+                            <div>
+                                <span style="color: #6b7280; font-size: 0.9rem;">Amount</span>
+                                <p style="font-weight: 600; color: #3B82F6; margin: 5px 0; font-size: 1.1rem;">
+                                    ₹{{ booking.total_price }}
+                                </p>
+                            </div>
+                            <div>
+                                <span style="color: #6b7280; font-size: 0.9rem;">Booked On</span>
+                                <p style="color: #1f2937; margin: 5px 0;">
+                                    {{ booking.booking_date|date:"M d, Y" }}
+                                </p>
+                            </div>
                         </div>
                     </div>
-                    {% endfor %}
-                </div>
-
-                <!-- Pagination -->
-                {% if page_obj.has_other_pages %}
-                <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #f1f5f9;">
-                    {% if page_obj.has_previous %}
-                        <a href="?page={{ page_obj.previous_page_number }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}" style="padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 6px; color: #374151; text-decoration: none; font-size: 0.9rem; transition: all 0.3s;"
-                           onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'">← Previous</a>
-                    {% endif %}
                     
-                    <span style="color: #6b7280; font-size: 0.9rem;">
-                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                    </span>
-                    
-                    {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}" style="padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 6px; color: #374151; text-decoration: none; font-size: 0.9rem; transition: all 0.3s;"
-                           onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'">Next →</a>
-                    {% endif %}
+                    <div style="text-align: right;">
+                        <span style="background-color: 
+                            {% if booking.status == 'confirmed' %}#10b981
+                            {% elif booking.status == 'in_progress' %}#f59e0b
+                            {% elif booking.status == 'completed' %}#3B82F6
+                            {% elif booking.status == 'cancelled' %}#ef4444
+                            {% else %}#6b7280{% endif %}; 
+                            color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; text-transform: capitalize; display: inline-block; margin-bottom: 15px;">
+                            {{ booking.status }}
+                        </span>
+                        <br>
+                        <a href="{% url 'booking_detail' booking.id %}" 
+                           style="background: #3B82F6; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: all 0.3s;"
+                           onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3B82F6'">
+                            View Details
+                        </a>
+                    </div>
                 </div>
-                {% endif %}
-
-            {% else %}
-                <!-- No Bookings Message -->
-                <div style="text-align: center; padding: 60px 20px;">
-                    <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;">📋</div>
-                    <h3 style="font-weight: 600; margin-bottom: 10px; color: #1f2937;">No bookings found</h3>
-                    <p style="color: #6b7280; margin-bottom: 25px;">
-                        {% if status_filter != 'all' %}
-                            You don't have any {{ status_filter }} bookings.
-                        {% else %}
-                            You haven't made any bookings yet.
+                
+                <!-- Quick Actions -->
+                <div style="border-top: 1px solid #e5e7eb; padding-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    {% if user.user_type == 'customer' %}
+                        {% if booking.status == 'confirmed' %}
+                        <a href="{% url 'contact_provider' booking.provider.id %}?service={{ booking.service.id }}" 
+                           style="background: #f1f5f9; color: #374151; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 0.8rem; font-weight: 500; border: 1px solid #e5e7eb; transition: all 0.3s;"
+                           onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f1f5f9'">
+                            📞 Contact
+                        </a>
+                        <a href="{% url 'cancel_booking' booking.id %}" 
+                           style="background: #fef2f2; color: #dc2626; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 0.8rem; font-weight: 500; border: 1px solid #fecaca; transition: all 0.3s;"
+                           onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">
+                            ❌ Cancel
+                        </a>
+                        {% elif booking.status == 'completed' and not booking.review %}
+                        <a href="{% url 'add_review' booking.id %}" 
+                           style="background: #fffbeb; color: #d97706; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 0.8rem; font-weight: 500; border: 1px solid #fcd34d; transition: all 0.3s;"
+                           onmouseover="this.style.background='#fef3c7'" onmouseout="this.style.background='#fffbeb'">
+                            ⭐ Review
+                        </a>
                         {% endif %}
-                    </p>
-                    <a href="{% url 'services' %}" style="background: #3B82F6; color: white; padding: 12px 30px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block;"
-                       onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3B82F6'">
-                        Browse Services
-                    </a>
+                    {% else %}
+                        {% if booking.status == 'pending' %}
+                        <a href="{% url 'accept_booking' booking.id %}" 
+                           style="background: #d1fae5; color: #065f46; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 0.8rem; font-weight: 500; border: 1px solid #a7f3d0; transition: all 0.3s;"
+                           onmouseover="this.style.background='#a7f3d0'" onmouseout="this.style.background='#d1fae5'">
+                            ✅ Accept
+                        </a>
+                        <a href="{% url 'reject_booking' booking.id %}" 
+                           style="background: #fee2e2; color: #dc2626; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 0.8rem; font-weight: 500; border: 1px solid #fca5a5; transition: all 0.3s;"
+                           onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'">
+                            ❌ Reject
+                        </a>
+                        {% elif booking.status == 'confirmed' %}
+                        <a href="{% url 'update_booking_status' booking.id %}?status=in_progress" 
+                           style="background: #fffbeb; color: #d97706; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 0.8rem; font-weight: 500; border: 1px solid #fcd34d; transition: all 0.3s;"
+                           onmouseover="this.style.background='#fef3c7'" onmouseout="this.style.background='#fffbeb'">
+                            🚀 Start
+                        </a>
+                        {% elif booking.status == 'in_progress' %}
+                        <a href="{% url 'update_booking_status' booking.id %}?status=completed" 
+                           style="background: #d1fae5; color: #065f46; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 0.8rem; font-weight: 500; border: 1px solid #a7f3d0; transition: all 0.3s;"
+                           onmouseover="this.style.background='#a7f3d0'" onmouseout="this.style.background='#d1fae5'">
+                            ✅ Complete
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'contact_provider' booking.customer.id %}?service={{ booking.service.id }}" 
+                           style="background: #f1f5f9; color: #374151; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 0.8rem; font-weight: 500; border: 1px solid #e5e7eb; transition: all 0.3s;"
+                           onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f1f5f9'">
+                            📞 Contact
+                        </a>
+                    {% endif %}
                 </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 40px;">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}" 
+               style="background: #3B82F6; color: white; padding: 10px 15px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s;"
+               onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3B82F6'">
+                ← Previous
+            </a>
+            {% endif %}
+            
+            <span style="color: #6b7280; font-weight: 500;">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}" 
+               style="background: #3B82F6; color: white; padding: 10px 15px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s;"
+               onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3B82F6'">
+                Next →
+            </a>
             {% endif %}
         </div>
+        {% endif %}
+
+        {% else %}
+        <!-- Empty State -->
+        <div style="text-align: center; padding: 60px 20px;">
+            <div style="font-size: 4rem; margin-bottom: 20px;">📋</div>
+            <h2 style="font-size: 1.8rem; font-weight: 600; color: #1f2937; margin-bottom: 15px;">
+                No Bookings Found
+            </h2>
+            <p style="color: #6b7280; font-size: 1.1rem; margin-bottom: 30px; max-width: 400px; margin-left: auto; margin-right: auto;">
+                {% if user.user_type == 'customer' %}
+                    You haven't made any bookings yet. Explore our services to get started!
+                {% else %}
+                    You haven't received any bookings yet. Keep your profile updated to attract more customers!
+                {% endif %}
+            </p>
+            {% if user.user_type == 'customer' %}
+            <a href="{% url 'services' %}" 
+               style="background: #3B82F6; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1rem; transition: all 0.3s; display: inline-block;"
+               onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3B82F6'">
+                Browse Services
+            </a>
+            {% else %}
+            <a href="{% url 'add_service' %}" 
+               style="background: #3B82F6; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1rem; transition: all 0.3s; display: inline-block;"
+               onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3B82F6'">
+                Add Services
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
 </main>
+
+<script>
+function toggleUserMenu() {
+    const dropdown = document.getElementById('dropdown-menu');
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+}
+
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('dropdown-menu');
+    const button = dropdown?.previousElementSibling;
+    if (dropdown && button && !button.contains(event.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+
+// Auto-hide messages after 5 seconds
+setTimeout(function() {
+    const messages = document.querySelectorAll('[style*="background: #d1fae5"], [style*="background: #fee2e2"]');
+    messages.forEach(message => {
+        message.style.display = 'none';
+    });
+}, 5000);
+</script>
 
 </body>
 </html>
