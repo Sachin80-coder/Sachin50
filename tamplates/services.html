@@ -10,13 +10,13 @@
 <!-- Header -->
 <header style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: fixed; width: 100%; top: 0; z-index: 1000;">
     <div style="max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="window.location.href='/'">
+        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="window.location.href='{% url 'index' %}'">
             <div style="width: 40px; height: 40px; background: #3B82F6; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">F</div>
             <span style="font-size: 1.5rem; font-weight: bold; color: #3B82F6;">FixFinder</span>
         </div>
         
         <nav style="display: flex; gap: 30px; align-items: center;">
-            <a href="/" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
+            <a href="{% url 'index' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
                onmouseover="this.style.color='#3B82F6'" onmouseout="this.style.color='#64748b'">Home</a>
             <a href="{% url 'services' %}" style="text-decoration: none; color: #3B82F6; font-weight: 500;">Services</a>
             <a href="{% url 'post_service_request' %}" style="text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.3s;" 
