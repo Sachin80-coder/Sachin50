@@ -1583,6 +1583,9 @@ def post_service_request(request):
             # Create notification for relevant service providers
             create_provider_notifications(service_request)
             
+            # Send email notifications
+            send_service_request_emails(service_request)
+            
             messages.success(request, 'Your service request has been posted successfully! Service providers in your area will be notified.')
             return redirect('service_requests')
         else:
@@ -1602,11 +1605,154 @@ def post_service_request(request):
     }
     return render(request, 'post_service_request.html', context)
 
+def send_service_request_emails(service_request):
+    """
+    Send email notifications for new service request
+    """
+    # 1. Send confirmation email to customer
+    send_customer_confirmation_email(service_request)
+    
+    # 2. Send notifications to relevant providers
+    send_provider_notification_emails(service_request)
+
+def send_customer_confirmation_email(service_request):
+    """
+    Send confirmation email to customer
+    """
+    try:
+        customer_subject = '✅ Service Request Posted Successfully - FixFinder'
+        customer_message = f"""
+Hello {service_request.customer.first_name},
+
+🎉 Your service request has been posted successfully!
+
+📋 **Request Details:**
+• Service: {service_request.title}
+• Category: {service_request.category.name}
+• Location: {service_request.location}
+• Budget: {service_request.budget}
+• Request ID: #{service_request.id}
+• Posted on: {service_request.created_at.strftime('%d %b %Y at %I:%M %p')}
+
+👥 **What Happens Next:**
+1. Service providers in your area will be notified about your request
+2. Providers will review your request and send responses
+3. You'll receive notifications when providers respond
+4. You can review provider profiles and choose the best fit
+
+📞 **Providers will contact you at:**
+• Name: {service_request.contact_name}
+• Phone: {service_request.contact_phone}
+
+🔍 **To view responses:**
+1. Login to your FixFinder account
+2. Go to "My Service Requests"
+3. Click on your request to see provider responses
+
+We'll notify you as soon as providers start responding!
+
+Thank you for choosing FixFinder! 🛠️
+
+Best regards,
+FixFinder Team
+        """
+        
+        send_mail(
+            customer_subject,
+            customer_message.strip(),
+            settings.DEFAULT_FROM_EMAIL,
+            [service_request.customer.email],
+            fail_silently=False,
+        )
+        print(f"✅ Customer confirmation email sent to: {service_request.customer.email}")
+        
+    except Exception as e:
+        print(f"❌ Customer confirmation email failed: {e}")
+
+def send_provider_notification_emails(service_request):
+    """
+    Send notification emails to relevant providers
+    """
+    # Get providers in same location and category
+    relevant_providers = CustomUser.objects.filter(
+        user_type='provider',
+        location__icontains=service_request.location.split(',')[0].strip() if service_request.location else '',
+        service_categories=service_request.category
+    ).distinct()
+    
+    provider_count = 0
+    for provider in relevant_providers:
+        try:
+            provider_subject = f'🎯 New Service Request: {service_request.title} - FixFinder'
+            provider_message = f"""
+Hello {provider.first_name},
+
+🚀 A new service request matching your expertise has been posted in your area!
+
+📋 **Service Request Details:**
+• Service: {service_request.title}
+• Category: {service_request.category.name}
+• Location: {service_request.location}
+• Budget: {service_request.budget}
+• Request ID: #{service_request.id}
+• Posted: {service_request.created_at.strftime('%d %b %Y at %I:%M %p')}
+
+📍 **Customer Location:**
+{service_request.location}
+
+💰 **Budget Range:**
+{service_request.budget}
+
+📝 **Service Description:**
+{service_request.description}
+
+👤 **Customer Contact Information:**
+• Name: {service_request.contact_name}
+• Phone: {service_request.contact_phone}
+
+🎯 **Why This Request Matches You:**
+• Category: {service_request.category.name} matches your expertise
+• Location: {service_request.location} is in your service area
+• You have experience in this service type
+
+🚀 **How to Respond:**
+1. Login to your FixFinder account
+2. Go to "Available Requests" section
+3. Find this request (ID: #{service_request.id})
+4. Click "View Details & Respond"
+5. Send your proposal to the customer
+
+💡 **Quick Response Tip:**
+• Respond within 24 hours for better chances
+• Provide clear pricing and timeline
+• Highlight your relevant experience
+
+Don't miss this opportunity! The customer is waiting for responses.
+
+Best regards,
+FixFinder Team
+            """
+            
+            send_mail(
+                provider_subject,
+                provider_message.strip(),
+                settings.DEFAULT_FROM_EMAIL,
+                [provider.email],
+                fail_silently=True,
+            )
+            provider_count += 1
+            print(f"✅ Provider notification sent to: {provider.email}")
+            
+        except Exception as e:
+            print(f"❌ Provider email failed for {provider.email}: {e}")
+    
+    print(f"📧 Total {provider_count} providers notified about service request #{service_request.id}")
+
 def create_provider_notifications(service_request):
     """
-    Utility function to create notifications for relevant service providers.
+    Create in-app notifications for relevant service providers
     """
-    # Get providers in the same location and category
+    # Get providers in same location and category
     relevant_providers = CustomUser.objects.filter(
         user_type='provider',
         location__icontains=service_request.location.split(',')[0].strip() if service_request.location else '',
@@ -1621,32 +1767,14 @@ def create_provider_notifications(service_request):
             message=f"A new {service_request.category.name} request has been posted in {service_request.location}.",
             notification_type='service_request'
         )
-        
-        # Optional: Send email notification
-        try:
-            send_mail(
-                f'New Service Request in Your Area - {service_request.category.name}',
-                f'''
-Hello {provider.first_name},
-
-A new service request matching your expertise has been posted:
-
-Service: {service_request.title}
-Category: {service_request.category.name}
-Location: {service_request.location}
-Budget: {service_request.budget}
-
-Log in to your FixFinder account to view the details and respond.
-
-Best regards,
-FixFinder Team
-                ''',
-                settings.DEFAULT_FROM_EMAIL,
-                [provider.email],
-                fail_silently=True,
-            )
-        except Exception as e:
-            print(f"Email notification failed: {e}")
+    
+    # Create notification for customer
+    Notification.objects.create(
+        user=service_request.customer,
+        title="Service Request Posted Successfully",
+        message=f"Your service request '{service_request.title}' has been posted. Providers will be notified.",
+        notification_type='request_posted'
+    )
 
 
 

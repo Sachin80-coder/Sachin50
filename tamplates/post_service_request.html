@@ -91,7 +91,7 @@
 
         <!-- Request Form -->
         <div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-            <form method="POST" action="{% url 'post_service_request' %}">
+            <form method="POST">
                 {% csrf_token %}
                 
                 <!-- Service Category -->

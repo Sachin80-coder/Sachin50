@@ -1,0 +1,1 @@
+web: gunicorn fixfinder.wsgi
